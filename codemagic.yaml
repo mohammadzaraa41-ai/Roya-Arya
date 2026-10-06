@@ -22,10 +22,10 @@ workflows:
 
       - name: Set up code signing
         script: |
-          # If Apple integration is configured in Codemagic UI, automatically fetch profiles:
+          # Automatically fetch signing certificates if Apple Integration is linked:
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --create || echo "Signing files will be handled via profiles or manual"
+            --create || echo "Profiles will be managed manually or automatically"
           keychain add-certificates || true
           xcode-project use-profiles || true
 
@@ -39,15 +39,3 @@ workflows:
       - build/ios/ipa/*.ipa
       - /Users/builder/clone/ios/App/build/**/*.ipa
       - "*.ipa"
-
-    publishing:
-      email:
-        recipients:
-          - user
-        notify:
-          failure: true
-          success: true
-      # Publishing to TestFlight / App Store automatically when credentials are linked:
-      # app_store_connect:
-      #   auth: integration
-      #   submit_to_testflight: true
