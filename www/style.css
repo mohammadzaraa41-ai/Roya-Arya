@@ -1066,6 +1066,278 @@ input:checked + .slider:before {
   color: var(--danger-red) !important;
 }
 
+.text-gold {
+  color: var(--prism-gold) !important;
+}
+
 .hidden {
   display: none !important;
 }
+
+/* =========================================
+   GEMS & REWARDED ADS ENHANCEMENTS
+   ========================================= */
+
+/* Gems HUD Pill */
+.gems-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 183, 3, 0.12);
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 10px rgba(255, 183, 3, 0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gems-hud-pill:active {
+  transform: scale(0.95);
+}
+
+.gem-icon {
+  font-size: 0.9rem;
+  filter: drop-shadow(0 0 4px #ffb703);
+}
+
+.gem-amount {
+  font-family: var(--font-number);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+/* Daily / Ad Reward Card in Title Screen */
+.daily-reward-card {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(255, 183, 3, 0.15), rgba(181, 55, 242, 0.15));
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(255, 183, 3, 0.15);
+  animation: pulseCard 3s infinite alternate;
+}
+
+@keyframes pulseCard {
+  0% { border-color: rgba(255, 183, 3, 0.3); }
+  100% { border-color: rgba(255, 183, 3, 0.8); box-shadow: 0 4px 20px rgba(255, 183, 3, 0.3); }
+}
+
+.reward-icon-sparkle {
+  font-size: 1.8rem;
+  animation: bounceGift 1.8s infinite ease-in-out;
+}
+
+@keyframes bounceGift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px) scale(1.1); }
+}
+
+.reward-text-col {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  flex: 1;
+}
+
+.reward-tag {
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: var(--prism-gold);
+  text-transform: uppercase;
+}
+
+.reward-title {
+  font-size: 0.82rem;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.btn-reward-pill {
+  background: linear-gradient(135deg, var(--prism-gold), #ff8800);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  color: #030814;
+  font-weight: 900;
+  font-size: 0.82rem;
+  font-family: var(--font-main);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 183, 3, 0.4);
+  white-space: nowrap;
+  transition: transform 0.2s ease;
+}
+
+.btn-reward-pill:active {
+  transform: scale(0.94);
+}
+
+/* Double Reward Button in Victory Modal */
+.btn-ad-double {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, #ffb703, #fb8500, #b537f2);
+  background-size: 200% auto;
+  border: none;
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.92rem;
+  cursor: pointer;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 18px rgba(255, 183, 3, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-ad-double:hover {
+  background-position: right center;
+}
+
+.btn-ad-double:active {
+  transform: scale(0.97);
+}
+
+.ad-pill-tag {
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+/* Achievements Progress Header */
+.achieve-summary-box {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.achieve-summary-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.achieve-percent-val {
+  font-family: var(--font-number);
+  font-weight: 900;
+  color: var(--prism-gold);
+}
+
+.achieve-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.achieve-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--roya-cyan), var(--prism-gold));
+  transition: width 0.4s ease;
+}
+
+/* Individual Achievement Card Upgrades */
+.achieve-card {
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.achieve-card.unlocked {
+  background: linear-gradient(135deg, rgba(255, 183, 3, 0.12), rgba(0, 243, 255, 0.08));
+  border-color: rgba(255, 183, 3, 0.6);
+  box-shadow: 0 4px 14px rgba(255, 183, 3, 0.15);
+}
+
+.achieve-reward-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(255, 183, 3, 0.2);
+  color: var(--prism-gold);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  margin-top: 3px;
+}
+
+.achieve-card-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.achieve-card-progress-fill {
+  height: 100%;
+  background: var(--roya-cyan);
+}
+
+/* Skins Balance Header */
+.skins-balance-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.skins-gems-badge {
+  color: var(--prism-gold);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+/* Skin Buy / Unlock Buttons */
+.btn-skin-buy {
+  background: linear-gradient(135deg, #ffb703, #ff8800);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #030814;
+  font-weight: 900;
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-skin-ad {
+  background: linear-gradient(135deg, var(--arya-magenta), var(--synergy-purple));
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 5px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+}
+

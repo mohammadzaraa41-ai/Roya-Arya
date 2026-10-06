@@ -45,6 +45,12 @@
       </div>
 
       <div class="hud-right">
+        <!-- Gems Currency Counter -->
+        <div class="gems-hud-pill" id="hud-gems-badge" title="رصيد جواهر النيون">
+          <span class="gem-icon">💎</span>
+          <span class="gem-amount" id="hud-gems-val">50</span>
+        </div>
+
         <!-- Spirits Status Indicators -->
         <div class="spirits-badge" id="spirits-badge" title="Roya (سماوي) & Arya (وردي)">
           <div class="spirit-dot spirit-roya active" id="dot-roya">
@@ -99,6 +105,18 @@
         <p class="game-intro-desc">
           وجّه الروحين التوأم عبر المنشورات والبوابات النيونية لتفتيت بلورات الظلام بأقل عدد من الارتدادات!
         </p>
+
+        <!-- Daily Rewarded Ad Reward Box -->
+        <div class="daily-reward-card" id="card-daily-reward">
+          <div class="reward-icon-sparkle">🎁</div>
+          <div class="reward-text-col">
+            <span class="reward-tag">مكافأة الأطياف السريعة</span>
+            <span class="reward-title">شاهد إعلاناً واحصل على <strong>+100 💎 جوهرة</strong> مجاناً!</span>
+          </div>
+          <button id="btn-claim-ad-gems" class="btn-reward-pill">
+            <span>مكافأة 🎬</span>
+          </button>
+        </div>
 
         <!-- Mode Switcher -->
         <div class="mode-tabs">
@@ -175,7 +193,18 @@
             <span class="stat-num" id="stat-max-combo">x4</span>
             <span class="stat-lbl">أعلى كومبو</span>
           </div>
+          <div class="stat-divider"></div>
+          <div class="stat-col">
+            <span class="stat-num text-gold" id="stat-stage-gems">+35 💎</span>
+            <span class="stat-lbl">الجواهر</span>
+          </div>
         </div>
+
+        <!-- Double Reward with Rewarded Video Ad -->
+        <button id="btn-double-reward-ad" class="btn-ad-double">
+          <span class="ad-pill-tag">مكافأة x2</span>
+          <span>🎬 شاهد إعلاناً وضاعف الجواهر (+70 💎)</span>
+        </button>
 
         <div class="modal-btn-stack">
           <button id="btn-next-level" class="btn-primary pulse-btn">
@@ -291,6 +320,10 @@
           <h2 class="modal-title">أزياء وأطياف رويا وآريا</h2>
           <button id="btn-close-skins" class="icon-btn-close">✕</button>
         </div>
+        <div class="skins-balance-bar">
+          <span>رصيدك من الجواهر:</span>
+          <span class="skins-gems-badge">💎 <strong id="skins-modal-gems">50</strong></span>
+        </div>
         <p class="modal-subtitle">خصّص الهالات الضوئية ومسارات النجوم للأرواح</p>
 
         <div class="skins-list" id="skins-list">
@@ -306,7 +339,19 @@
           <h2 class="modal-title">الأوسمة والإنجازات</h2>
           <button id="btn-close-achievements" class="icon-btn-close">✕</button>
         </div>
-        <p class="modal-subtitle">أكمل التحديات الاستثنائية للحصول على أوسمة الشرف</p>
+        
+        <!-- Achievements Progress Bar Header -->
+        <div class="achieve-summary-box">
+          <div class="achieve-summary-info">
+            <span>الأوسمة المكتملة: <strong id="achieve-count-text">0 / 8</strong></span>
+            <span class="achieve-percent-val" id="achieve-percent-text">0%</span>
+          </div>
+          <div class="achieve-progress-track">
+            <div class="achieve-progress-fill" id="achieve-progress-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <p class="modal-subtitle">كل وسام تفتحه يمنحك <strong>+50 💎 جوهرة</strong> فورية!</p>
 
         <div class="achievements-grid" id="achievements-grid">
           <!-- Populated dynamically -->
