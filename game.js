@@ -27,10 +27,10 @@
 
   // Available Skins
   const SKINS = [
-    { id: 'neon', name: 'أطياف النيون الأصلية', desc: 'السماوي والوردي الكلاسيكي', cyan: '#00f3ff', magenta: '#ff007f', cost: 0 },
-    { id: 'aurora', name: 'شفق الفضاء الزمردي', desc: 'الزمردي ولهب المرجان', cyan: '#06d6a0', magenta: '#ff5400', cost: 150 },
-    { id: 'celestial', name: 'السديم الملكي', desc: 'البنفسجي والذهب الشمسي', cyan: '#7209b7', magenta: '#ffb703', cost: 300 },
-    { id: 'supernova', name: 'شمس السوبرنوفا', desc: 'اللهب الشمسي والأرجواني الكوني', cyan: '#ff7700', magenta: '#d90429', cost: 450 }
+    { id: 'neon', name_ar: 'أطياف النيون الأصلية', name_en: 'Classic Neon Spirits', desc_ar: 'السماوي والوردي الكلاسيكي', desc_en: 'Classic cyan & magenta duo', cyan: '#00f3ff', magenta: '#ff007f', cost: 0 },
+    { id: 'aurora', name_ar: 'شفق الفضاء الزمردي', name_en: 'Emerald Space Aurora', desc_ar: 'الزمردي ولهب المرجان', desc_en: 'Vibrant emerald & coral blaze', cyan: '#06d6a0', magenta: '#ff5400', cost: 150 },
+    { id: 'celestial', name_ar: 'السديم الملكي', name_en: 'Celestial Royalty', desc_ar: 'البنفسجي والذهب الشمسي', desc_en: 'Royal purple & solar gold', cyan: '#7209b7', magenta: '#ffb703', cost: 300 },
+    { id: 'supernova', name_ar: 'شمس السوبرنوفا', name_en: 'Supernova Flare', desc_ar: 'اللهب الشمسي والأرجواني الكوني', desc_en: 'Solar flares & cosmic crimson', cyan: '#ff7700', magenta: '#d90429', cost: 450 }
   ];
 
   // --- State ---
@@ -66,15 +66,15 @@
 
   // Achievements Definition with Targets and Rewards
   const ACHIEVEMENTS = [
-    { id: 'first_gem', icon: '💎', title: 'بريق الأطياف', desc: 'جمع 50 جوهرة نيونية', target: 50, reward: 50, type: 'gems' },
-    { id: 'ad_supporter', icon: '🎁', title: 'حليف الأطياف', desc: 'مشاهدة إعلان مكافأة ودعم اللعبة', target: 1, reward: 100, type: 'ads' },
-    { id: 'first_shot', icon: '🎯', title: 'قناص الأطياف', desc: 'إنهاء مرحلة بضربة واحدة فقط', target: 1, reward: 50, type: 'oneshot' },
-    { id: 'combo_master', icon: '⚡', title: 'سيد الكومبو', desc: 'تحقيق كومبو x3 أو أكثر', target: 3, reward: 50, type: 'combo' },
-    { id: 'crystal_hunter', icon: '💎', title: 'صائد البلورات', desc: 'سحق 30 بلورة نيونية', target: 30, reward: 60, type: 'crystals' },
-    { id: 'portal_traveler', icon: '🌀', title: 'مسافر الأبعاد', desc: 'استخدام بوابات الانتقال الفضائي 3 مرات', target: 3, reward: 50, type: 'portals' },
-    { id: 'stars_collector', icon: '🌟', title: 'جامع النجوم', desc: 'جمع 15 نجمة أو أكثر في المراحل', target: 15, reward: 80, type: 'stars' },
-    { id: 'skin_collector', icon: '🎨', title: 'أناقة النيون', desc: 'فتح مظهر نيون جديد للأرواح', target: 2, reward: 70, type: 'skins' },
-    { id: 'harmony_master', icon: '👑', title: 'سيد المجرات', desc: 'بلوغ المرحلة 8 (العالم الثاني)', target: 8, reward: 100, type: 'level' }
+    { id: 'first_gem', icon: '💎', title_ar: 'بريق الأطياف', title_en: 'Spirit Gleam', desc_ar: 'جمع 50 جوهرة نيونية', desc_en: 'Collect 50 neon gems', target: 50, reward: 50, type: 'gems' },
+    { id: 'ad_supporter', icon: '🎁', title_ar: 'حليف الأطياف', title_en: 'Spirit Ally', desc_ar: 'مشاهدة إعلان مكافأة ودعم اللعبة', desc_en: 'Watch a rewarded ad to support the game', target: 1, reward: 100, type: 'ads' },
+    { id: 'first_shot', icon: '🎯', title_ar: 'قناص الأطياف', title_en: 'One-Shot Ace', desc_ar: 'إنهاء مرحلة بضربة واحدة فقط', desc_en: 'Clear a stage with a single shot', target: 1, reward: 50, type: 'oneshot' },
+    { id: 'combo_master', icon: '⚡', title_ar: 'سيد الكومبو', title_en: 'Combo Master', desc_ar: 'تحقيق كومبو x3 أو أكثر', desc_en: 'Reach a combo of x3 or higher', target: 3, reward: 50, type: 'combo' },
+    { id: 'crystal_hunter', icon: '💠', title_ar: 'صائد البلورات', title_en: 'Crystal Hunter', desc_ar: 'سحق 30 بلورة نيونية', desc_en: 'Shatter 30 neon crystals', target: 30, reward: 60, type: 'crystals' },
+    { id: 'portal_traveler', icon: '🌀', title_ar: 'مسافر الأبعاد', title_en: 'Wormhole Traveler', desc_ar: 'استخدام بوابات الانتقال الفضائي 3 مرات', desc_en: 'Traverse cosmic portals 3 times', target: 3, reward: 50, type: 'portals' },
+    { id: 'stars_collector', icon: '🌟', title_ar: 'جامع النجوم', title_en: 'Star Collector', desc_ar: 'جمع 15 نجمة أو أكثر في المراحل', desc_en: 'Collect 15 or more stage stars', target: 15, reward: 80, type: 'stars' },
+    { id: 'skin_collector', icon: '🎨', title_ar: 'أناقة النيون', title_en: 'Neon Elegance', desc_ar: 'فتح مظهر نيون جديد للأرواح', desc_en: 'Unlock a new spirit skin', target: 2, reward: 70, type: 'skins' },
+    { id: 'harmony_master', icon: '👑', title_ar: 'سيد المجرات', title_en: 'Galaxy Master', desc_ar: 'بلوغ المرحلة 10 وإنهاء العالم الأول', desc_en: 'Conquer Stage 10 and clear World 1', target: 10, reward: 100, type: 'level' }
   ];
 
   // --- Entities Arrays ---
@@ -411,7 +411,8 @@
   }
 
   function updateHud() {
-    hudLevelText.textContent = `المرحلة ${state.currentLevel}`;
+    const stagePrefix = window.i18n ? window.i18n.t('hud_stage_prefix') : 'المرحلة';
+    hudLevelText.textContent = `${stagePrefix} ${state.currentLevel}`;
     hudScoreVal.textContent = state.score.toLocaleString();
     hudShotsVal.textContent = state.shotsLeft;
 
@@ -795,8 +796,11 @@
     const toastDesc = document.getElementById('toast-desc');
 
     if (toast && toastTitle && toastDesc) {
-      toastTitle.textContent = `${ach.icon} وسام: ${ach.title} (+${ach.reward} 💎)`;
-      toastDesc.textContent = ach.desc;
+      const isEn = window.i18n && window.i18n.getLang() === 'en';
+      const title = isEn ? (ach.title_en || ach.title) : (ach.title_ar || ach.title);
+      const desc = isEn ? (ach.desc_en || ach.desc) : (ach.desc_ar || ach.desc);
+      toastTitle.textContent = `${ach.icon} ${isEn ? 'Badge:' : 'وسام:'} ${title} (+${ach.reward} 💎)`;
+      toastDesc.textContent = desc;
       toast.classList.remove('hidden');
 
       clearTimeout(toast.timer);
@@ -861,14 +865,15 @@
     // Configure Double Reward Ad Button
     const btnDoubleAd = document.getElementById('btn-double-reward-ad');
     if (btnDoubleAd) {
+      const isEn = window.i18n && window.i18n.getLang() === 'en';
       btnDoubleAd.disabled = false;
-      btnDoubleAd.innerHTML = `<span class="ad-pill-tag">مكافأة x2</span><span>🎬 شاهد إعلاناً وضاعف الجواهر (+${stageGems * 2} 💎)</span>`;
+      btnDoubleAd.innerHTML = `<span class="ad-pill-tag">${isEn ? 'Reward x2' : 'مكافأة x2'}</span><span>🎬 ${isEn ? 'Watch Ad & Double Gems' : 'شاهد إعلاناً وضاعف الجواهر'} (+${stageGems * 2} 💎)</span>`;
       btnDoubleAd.onclick = () => {
         showRewardedAd(() => {
           addGems(stageGems, true);
           btnDoubleAd.disabled = true;
-          btnDoubleAd.innerHTML = `<span style="color:#06d6a0;">تمت مضاعفة المكافأة بنجاح! ✓ (+${stageGems * 2} 💎)</span>`;
-        }, 'جاري تجهيز مضاعفة مكافأة النصر...');
+          btnDoubleAd.innerHTML = `<span style="color:#06d6a0;">${isEn ? 'Reward Doubled Successfully! ✓' : 'تمت مضاعفة المكافأة بنجاح! ✓'} (+${stageGems * 2} 💎)</span>`;
+        }, isEn ? 'Preparing double reward...' : 'جاري تجهيز مضاعفة مكافأة النصر...');
       };
     }
 
@@ -1690,10 +1695,39 @@
         saveStorage();
         if (window.soundEngine.playAchievement) window.soundEngine.playAchievement();
         triggerHaptic('medium');
-        addFloatingText('تمت استعادة VIP + 500 💎!', drag.anchorX, drag.anchorY - 40, '#06d6a0');
-        alert('✨ تم التحقق من حساب Apple StoreKit بنجاح: تم تفعيل باقة VIP الملكية، فتح جميع الأطياف، وإضافة 500 جوهرة نيون!');
+        const isEn = window.i18n && window.i18n.getLang() === 'en';
+        addFloatingText(isEn ? 'Restored VIP + 500 💎!' : 'تمت استعادة VIP + 500 💎!', drag.anchorX, drag.anchorY - 40, '#06d6a0');
+        alert(isEn 
+          ? '✨ Apple StoreKit Account Verified: Royal VIP unlocked, all spirit skins granted, and +500 Neon Gems added!'
+          : '✨ تم التحقق من حساب Apple StoreKit بنجاح: تم تفعيل باقة VIP الملكية، فتح جميع الأطياف، وإضافة 500 جوهرة نيون!'
+        );
       };
     }
+
+    // Language Toggle Buttons
+    const btnToggleLang = document.getElementById('btn-toggle-lang');
+    if (btnToggleLang) {
+      btnToggleLang.onclick = () => window.i18n.toggleLanguage();
+    }
+    const btnPauseToggleLang = document.getElementById('btn-pause-toggle-lang');
+    if (btnPauseToggleLang) {
+      btnPauseToggleLang.onclick = () => window.i18n.toggleLanguage();
+    }
+
+    // Language Change Live Reactivity
+    window.addEventListener('roya:langchange', () => {
+      updateHud();
+      populateLevelsGrid();
+      populateAchievementsModal();
+      populateSkinsModal();
+      const hintP = gestureHint ? gestureHint.querySelector('p') : null;
+      if (hintP && window.i18n) {
+        hintP.textContent = window.i18n.t('hint_aim');
+      }
+      if (state.levelData) {
+        state.levelData = window.getLevelData(state.currentLevel);
+      }
+    });
   }
 
   function populateAchievementsModal() {
@@ -1731,19 +1765,23 @@
       else if (ach.id === 'harmony_master') currentVal = Math.min(ach.target, state.currentLevel);
 
       const progressPercent = Math.min(100, Math.round((currentVal / ach.target) * 100));
+      const isEn = window.i18n && window.i18n.getLang() === 'en';
+      const title = isEn ? (ach.title_en || ach.title) : (ach.title_ar || ach.title);
+      const desc = isEn ? (ach.desc_en || ach.desc) : (ach.desc_ar || ach.desc);
+      const completedText = isEn ? 'Completed ★' : 'مكتمل ★';
 
       const card = document.createElement('div');
       card.className = `achieve-card ${isUnlocked ? 'unlocked' : ''}`;
       card.innerHTML = `
         <span class="achieve-icon">${ach.icon}</span>
-        <span class="achieve-name">${ach.title}</span>
-        <span class="achieve-detail">${ach.desc}</span>
+        <span class="achieve-name">${title}</span>
+        <span class="achieve-detail">${desc}</span>
         <span class="achieve-reward-pill">+${ach.reward} 💎</span>
         <div class="achieve-card-progress-bar">
           <div class="achieve-card-progress-fill" style="width: ${isUnlocked ? '100%' : progressPercent + '%'}; background:${isUnlocked ? 'var(--prism-gold)' : 'var(--roya-cyan)'};"></div>
         </div>
         <span style="font-size:0.65rem; font-weight:800; color:${isUnlocked ? 'var(--prism-gold)' : 'var(--text-muted)'}; margin-top:3px;">
-          ${isUnlocked ? 'مكتمل ★' : `(${currentVal}/${ach.target})`}
+          ${isUnlocked ? completedText : `(${currentVal}/${ach.target})`}
         </span>
       `;
       grid.appendChild(card);
@@ -1752,31 +1790,58 @@
 
   function populateLevelsGrid() {
     const grid = document.getElementById('levels-grid');
+    if (!grid) return;
     grid.innerHTML = '';
 
-    const maxUnlocked = Object.keys(state.savedProgress.completedLevels).length + 1;
+    const isEn = window.i18n && window.i18n.getLang() === 'en';
+    const worlds = window.CAMPAIGN_WORLDS || [
+      { id: 1, name_ar: "العالم 1: سديم النيون", name_en: "World 1: Neon Genesis", levels: [1, 10], color: "#00f3ff" },
+      { id: 2, name_ar: "العالم 2: بوابات الأثير", name_en: "World 2: Prisms & Portals", levels: [11, 20], color: "#b537f2" },
+      { id: 3, name_ar: "العالم 3: الفوضى الحركية", name_en: "World 3: Kinetic Chaos", levels: [21, 30], color: "#ff007f" }
+    ];
 
-    for (let l = 1; l <= Math.max(12, maxUnlocked); l++) {
-      const tile = document.createElement('div');
-      const isLocked = l > maxUnlocked;
-      const isCompleted = state.savedProgress.completedLevels[l] !== undefined;
-      const isCurrent = l === state.currentLevel;
+    const maxUnlocked = Math.max(1, Object.keys(state.savedProgress.completedLevels).length + 1);
 
-      tile.className = `level-tile ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
-      tile.innerHTML = `
-        <span>${l}</span>
-        ${isCompleted ? `<span class="level-tile-stars">${'★'.repeat(state.savedProgress.completedLevels[l])}</span>` : ''}
-      `;
+    worlds.forEach(w => {
+      // World Section Header
+      const header = document.createElement('div');
+      header.className = 'world-section-header';
+      header.style.borderInlineStart = `3px solid ${w.color}`;
 
-      if (!isLocked) {
-        tile.onclick = () => {
-          modalLevels.classList.add('hidden');
-          screenTitle.classList.add('hidden');
-          initLevel(l);
-        };
+      let worldStars = 0;
+      for (let lvl = w.levels[0]; lvl <= w.levels[1]; lvl++) {
+        worldStars += (state.savedProgress.completedLevels[lvl] || 0);
       }
-      grid.appendChild(tile);
-    }
+      const maxWorldStars = (w.levels[1] - w.levels[0] + 1) * 3;
+
+      header.innerHTML = `
+        <span>${isEn ? w.name_en : w.name_ar}</span>
+        <span style="color:var(--prism-gold); font-size:0.78rem;">⭐ ${worldStars}/${maxWorldStars}</span>
+      `;
+      grid.appendChild(header);
+
+      for (let l = w.levels[0]; l <= w.levels[1]; l++) {
+        const tile = document.createElement('div');
+        const isLocked = l > maxUnlocked;
+        const isCompleted = state.savedProgress.completedLevels[l] !== undefined;
+        const isCurrent = l === state.currentLevel;
+
+        tile.className = `level-tile ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
+        tile.innerHTML = `
+          <span>${l}</span>
+          ${isCompleted ? `<span class="level-tile-stars">${'★'.repeat(state.savedProgress.completedLevels[l])}</span>` : (isLocked ? '<span style="font-size:0.7rem; opacity:0.6;">🔒</span>' : '')}
+        `;
+
+        if (!isLocked) {
+          tile.onclick = () => {
+            modalLevels.classList.add('hidden');
+            screenTitle.classList.add('hidden');
+            initLevel(l);
+          };
+        }
+        grid.appendChild(tile);
+      }
+    });
   }
 
   function populateSkinsModal() {
@@ -1785,6 +1850,7 @@
     list.innerHTML = '';
     updateGemsDisplay();
 
+    const isEn = window.i18n && window.i18n.getLang() === 'en';
     const unlockedSkins = state.savedProgress.unlockedSkins || ['neon'];
     const currentGems = state.savedProgress.gems || 0;
 
@@ -1794,20 +1860,23 @@
       const item = document.createElement('div');
       item.className = `skin-item ${isSelected ? 'selected' : ''}`;
 
+      const skinName = isEn ? (sk.name_en || sk.name) : (sk.name_ar || sk.name);
+      const skinDesc = isEn ? (sk.desc_en || sk.desc) : (sk.desc_ar || sk.desc);
+
       let actionHtml = '';
       if (isSelected) {
-        actionHtml = '<span style="color:var(--roya-cyan); font-weight:800; font-size:0.85rem;">مُفعل ✓</span>';
+        actionHtml = `<span style="color:var(--roya-cyan); font-weight:800; font-size:0.85rem;">${isEn ? 'Equipped ✓' : 'مُفعل ✓'}</span>`;
       } else if (isOwned) {
-        actionHtml = '<button class="btn-secondary btn-select-skin" style="padding:5px 12px; font-size:0.8rem;">تفعيل</button>';
+        actionHtml = `<button class="btn-secondary btn-select-skin" style="padding:5px 12px; font-size:0.8rem;">${isEn ? 'Equip' : 'تفعيل'}</button>`;
       } else {
         const canAfford = currentGems >= sk.cost;
         actionHtml = `
           <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-            <button class="btn-skin-buy" style="opacity:${canAfford ? '1' : '0.6'};" ${canAfford ? '' : 'title="تحتاج للمزيد من الجواهر"'}>
-              شراء ${sk.cost} 💎
+            <button class="btn-skin-buy" style="opacity:${canAfford ? '1' : '0.6'};" ${canAfford ? '' : `title="${isEn ? 'Need more gems' : 'تحتاج للمزيد من الجواهر'}"`}>
+              ${isEn ? 'Buy' : 'شراء'} ${sk.cost} 💎
             </button>
             <button class="btn-skin-ad">
-              فتح بإعلان 🎬
+              ${isEn ? 'Unlock with Ad 🎬' : 'فتح بإعلان 🎬'}
             </button>
           </div>
         `;
@@ -1817,8 +1886,8 @@
         <div class="skin-info">
           <div class="skin-swatch" style="background: linear-gradient(135deg, ${sk.cyan}, ${sk.magenta});"></div>
           <div>
-            <div class="skin-label">${sk.name}</div>
-            <div style="font-size:0.75rem; color:var(--text-muted);">${sk.desc}</div>
+            <div class="skin-label">${skinName}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">${skinDesc}</div>
           </div>
         </div>
         <div>
@@ -1855,7 +1924,11 @@
               triggerHaptic('heavy');
               populateSkinsModal();
             } else {
-              alert(`تحتاج إلى ${sk.cost - state.savedProgress.gems} 💎 جوهرة إضافية! يمكنك الحصول عليها مجاناً بمشاهدة الإعلانات أو الفوز بالمراحل.`);
+              const needed = sk.cost - state.savedProgress.gems;
+              alert(isEn 
+                ? `You need ${needed} more 💎 Gems! You can get them for free by watching ads or completing levels.`
+                : `تحتاج إلى ${needed} 💎 جوهرة إضافية! يمكنك الحصول عليها مجاناً بمشاهدة الإعلانات أو الفوز بالمراحل.`
+              );
             }
           };
         }
@@ -1874,8 +1947,8 @@
               saveStorage();
               checkUnlockAchievement('skin_collector');
               populateSkinsModal();
-              addFloatingText(`تم فتح مظهر ${sk.name}! ✨`, drag.anchorX, drag.anchorY - 40, '#06d6a0');
-            }, `جاري فتح مظهر ${sk.name}...`);
+              addFloatingText(isEn ? `Unlocked ${skinName}! ✨` : `تم فتح مظهر ${skinName}! ✨`, drag.anchorX, drag.anchorY - 40, '#06d6a0');
+            }, isEn ? `Unlocking ${skinName}...` : `جاري فتح مظهر ${skinName}...`);
           };
         }
       }

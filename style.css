@@ -1345,3 +1345,59 @@ input:checked + .slider:before {
   margin-top: 3px;
 }
 
+/* Language Toggle Button & World Headers */
+.title-top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 10;
+}
+
+.btn-lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  color: var(--roya-cyan);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
+}
+
+.btn-lang-toggle:hover, .btn-lang-toggle:active {
+  background: rgba(0, 243, 255, 0.22);
+  border-color: var(--roya-cyan);
+  transform: scale(1.04);
+}
+
+.world-section-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid var(--roya-cyan);
+  border-radius: var(--radius-sm);
+  margin-top: 10px;
+  margin-bottom: 2px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-align: start;
+}
+
+[dir="rtl"] .world-section-header {
+  border-left: none;
+  border-right: 3px solid var(--roya-cyan);
+}
+
+
