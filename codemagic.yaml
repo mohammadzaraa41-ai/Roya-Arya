@@ -6,6 +6,9 @@ workflows:
     integrations:
       app_store_connect: Codemagic1
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.royaarya.neonricochet
       node: 20
       xcode: latest
       cocoapods: default
@@ -24,9 +27,6 @@ workflows:
 
       - name: Set up code signing
         script: |
-          keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          keychain add-certificates
           xcode-project use-profiles
 
       - name: Build IPA for App Store
