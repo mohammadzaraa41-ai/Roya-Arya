@@ -73,6 +73,35 @@ npx cap open ios
 
 ---
 
+---
+
+## ☁️ خيار البناء والرفع السحابي التلقائي عبر GitHub Actions (بدون الحاجة لجهاز Mac محلي)
+
+تم إنشاء ملف سير العمل التلقائي جاهزاً داخل المشروع في:
+`.github/workflows/ios-deploy.yml`
+
+يستخدم هذا الإجراء خوادم macOS السحابية التابعة لـ GitHub لبناء اللعبة وتوقيعها ورفعها مباشرة إلى **App Store Connect / TestFlight**.
+
+### المتغيرات السرية (GitHub Secrets) المطلوبة:
+ادخل على مستودعك في GitHub ➔ **Settings** ➔ **Secrets and variables** ➔ **Actions** ➔ **New repository secret**:
+
+1. `BUILD_CERTIFICATE_BASE64`: ملف شهادة التوزيع (`Distribution Certificate .p12`) محولاً إلى Base64.
+2. `P12_PASSWORD`: كلمة مرور ملف الـ .p12.
+3. `BUILD_PROVISION_PROFILE_BASE64`: ملف الـ Provisioning Profile التابع للعبة محولاً إلى Base64.
+4. `APP_STORE_CONNECT_KEY_ID`: معرّف المفتاح من App Store Connect (مثل `2X9R4HXF34`).
+5. `APP_STORE_CONNECT_ISSUER_ID`: معرّف المصدر (Issuer ID) في App Store Connect (UUID).
+6. `APP_STORE_CONNECT_API_KEY_BASE64`: محتوى ملف مفتاح الربط `AuthKey_XXXXXX.p8` محولاً إلى Base64.
+
+### طريقة التشغيل:
+1. ارفع المشروع إلى GitHub (Push).
+2. في تبويب **Actions** في صفحة المستودع:
+   * اضغط على **Build & Deploy iOS to Apple App Store / TestFlight**.
+   * اضغط **Run workflow**.
+3. سيقوم GitHub Actions بتجهيز نسخة الآيفون وتوليد ملف الـ `.ipa` ورفعه مباشرة إلى حسابك على Apple TestFlight!
+
+---
+
 ## ⚡ نصائح هامة لاجتياز مراجعة Apple من أول مرة
 * **سياسة الخصوصية (Privacy Policy):** اللعبة تعمل كلياً **Offline-First** بدون طلب أي صلاحيات حساسة (الكاميرا، الموقع، جهات الاتصال)، لذا في صفحة App Privacy اختر "No data collected".
 * **التصنيف العمري (Age Rating):** اختر 4+ (مناسب للجميع).
+
