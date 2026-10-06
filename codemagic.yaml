@@ -4,6 +4,9 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m1
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.royaarya.neonricochet
       node: 20
       xcode: latest
       cocoapods: default
@@ -22,12 +25,7 @@ workflows:
 
       - name: Set up code signing
         script: |
-          # Automatically fetch signing certificates if Apple Integration is linked:
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create || echo "Profiles will be managed manually or automatically"
-          keychain add-certificates || true
-          xcode-project use-profiles || true
+          xcode-project use-profiles
 
       - name: Build IPA for App Store
         script: |
@@ -39,3 +37,8 @@ workflows:
       - build/ios/ipa/*.ipa
       - /Users/builder/clone/ios/App/build/**/*.ipa
       - "*.ipa"
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
