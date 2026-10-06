@@ -1,0 +1,15 @@
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# iOS build artifacts
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/App/build/
+DerivedData/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
