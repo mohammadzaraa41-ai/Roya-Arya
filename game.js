@@ -241,10 +241,19 @@
   }
 
   function triggerHaptic(type = 'light') {
-    if (!state.settings.haptics || !navigator.vibrate) return;
-    if (type === 'light') navigator.vibrate(12);
-    else if (type === 'medium') navigator.vibrate(28);
-    else if (type === 'heavy') navigator.vibrate([35, 30, 45]);
+    if (!state.settings.haptics) return;
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+        const Haptics = window.Capacitor.Plugins.Haptics;
+        if (type === 'light') Haptics.impact({ style: 'LIGHT' });
+        else if (type === 'medium') Haptics.impact({ style: 'MEDIUM' });
+        else if (type === 'heavy') Haptics.impact({ style: 'HEAVY' });
+      } else if (navigator.vibrate) {
+        if (type === 'light') navigator.vibrate(12);
+        else if (type === 'medium') navigator.vibrate(28);
+        else if (type === 'heavy') navigator.vibrate([35, 30, 45]);
+      }
+    } catch (_) {}
   }
 
   // --- Particle & FX System ---
@@ -417,6 +426,7 @@
     state.gameState = 'FLYING';
     state.shotsLeft--;
     state.currentCombo = 0;
+    state.flightSafetyTimer = 0;
     updateHud();
     gestureHint.classList.add('hidden');
 
@@ -431,24 +441,29 @@
     orbs[0].vy = vy;
     orbs[0].active = true;
 
-    // Launch Arya with slight delay and tandem trajectory
-    setTimeout(() => {
-      if (orbs[1]) {
-        orbs[1].x = drag.anchorX;
-        orbs[1].y = drag.anchorY;
-        // Subtle divergent angle (±3 degrees) creates breathtaking twin arcs
-        const angle = Math.atan2(vy, vx) + (Math.PI / 36);
-        const speed = Math.hypot(vx, vy);
-        orbs[1].vx = Math.cos(angle) * speed;
-        orbs[1].vy = Math.sin(angle) * speed;
-        orbs[1].active = true;
-      }
-    }, 75);
+    // Launch Arya with deterministic frame countdown (4 frames ~66ms)
+    if (orbs[1]) {
+      orbs[1].x = drag.anchorX;
+      orbs[1].y = drag.anchorY;
+      const angle = Math.atan2(vy, vx) + (Math.PI / 36);
+      const speed = Math.hypot(vx, vy);
+      orbs[1].pendingVx = Math.cos(angle) * speed;
+      orbs[1].pendingVy = Math.sin(angle) * speed;
+      orbs[1].launchDelay = 4;
+      orbs[1].active = false;
+    }
   }
 
   // --- Physics & Collision Engine ---
   function updatePhysics(dt) {
     if (state.gameState !== 'FLYING') return;
+
+    // Flight Safety Watchdog (prevents perpetual loops)
+    state.flightSafetyTimer = (state.flightSafetyTimer || 0) + (dt || 0.016);
+    if (state.flightSafetyTimer > 7.5) {
+      handleFlightEnd();
+      return;
+    }
 
     let allStopped = true;
 
@@ -456,6 +471,19 @@
     spinners.forEach(spin => {
       spin.angle += spin.speed * dt;
     });
+
+    // Synchronous tandem launch countdown for Arya
+    if (orbs[1] && orbs[1].launchDelay > 0) {
+      allStopped = false;
+      orbs[1].launchDelay--;
+      if (orbs[1].launchDelay === 0) {
+        orbs[1].x = drag.anchorX;
+        orbs[1].y = drag.anchorY;
+        orbs[1].vx = orbs[1].pendingVx;
+        orbs[1].vy = orbs[1].pendingVy;
+        orbs[1].active = true;
+      }
+    }
 
     orbs.forEach(orb => {
       if (!orb.active) return;
@@ -662,6 +690,10 @@
     if (dist < orb.radius + 6) {
       const nx = (orb.x - projX) / (dist || 1);
       const ny = (orb.y - projY) / (dist || 1);
+
+      // Positional displacement outside collider to prevent multi-frame sticking
+      orb.x = projX + nx * (orb.radius + 7);
+      orb.y = projY + ny * (orb.radius + 7);
 
       // Impart rotational speed to the bounce
       orb.vx = nx * 8 + (-sin * spin.speed * 4);
@@ -935,15 +967,22 @@
       ctx.save();
       ctx.translate(w.x, w.y);
       ctx.rotate(w.angle);
-      ctx.fillStyle = COLORS.wall.main;
-      ctx.strokeStyle = COLORS.wall.light;
-      ctx.lineWidth = 2;
-      ctx.shadowColor = COLORS.wall.glow;
-      ctx.shadowBlur = 10;
 
       const r = 4;
       const x = -w.width / 2;
       const y = -w.height / 2;
+
+      // Outer glow boundary
+      ctx.strokeStyle = 'rgba(181, 55, 242, 0.3)';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.roundRect(x - 1.5, y - 1.5, w.width + 3, w.height + 3, r + 1);
+      ctx.stroke();
+
+      // Main wall fill & crisp border
+      ctx.fillStyle = COLORS.wall.main;
+      ctx.strokeStyle = COLORS.wall.light;
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(x, y, w.width, w.height, r);
       ctx.fill();
@@ -958,15 +997,29 @@
       ctx.translate(spin.x, spin.y);
       ctx.rotate(spin.angle);
 
-      ctx.strokeStyle = COLORS.cyan.main;
-      ctx.lineWidth = 8;
+      // Outer neon halo
+      ctx.strokeStyle = 'rgba(0, 243, 255, 0.25)';
+      ctx.lineWidth = 14;
       ctx.lineCap = 'round';
-      ctx.shadowColor = COLORS.cyan.glow;
-      ctx.shadowBlur = 15;
-
       ctx.beginPath();
       ctx.moveTo(-spin.length / 2, 0);
       ctx.lineTo(spin.length / 2, 0);
+      ctx.stroke();
+
+      // Main vibrant blade
+      ctx.strokeStyle = COLORS.cyan.main;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(-spin.length / 2, 0);
+      ctx.lineTo(spin.length / 2, 0);
+      ctx.stroke();
+
+      // Sharp white core spine
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-spin.length / 2 + 4, 0);
+      ctx.lineTo(spin.length / 2 - 4, 0);
       ctx.stroke();
 
       // Center pivot jewel
@@ -986,15 +1039,26 @@
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rot);
 
-      // Triangular Prism
-      ctx.fillStyle = 'rgba(255, 183, 3, 0.2)';
-      ctx.strokeStyle = COLORS.gold.main;
-      ctx.lineWidth = 3;
-      ctx.shadowColor = COLORS.gold.glow;
-      ctx.shadowBlur = 20;
-
+      // Triangular Prism - Outer halo
+      ctx.strokeStyle = 'rgba(255, 183, 3, 0.35)';
+      ctx.lineWidth = 7;
       ctx.beginPath();
       const sides = 3;
+      for (let i = 0; i < sides; i++) {
+        const a = (i * 2 * Math.PI) / sides;
+        const px = Math.cos(a) * (p.radius + 2);
+        const py = Math.sin(a) * (p.radius + 2);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+
+      // Main Prism Fill & Stroke
+      ctx.fillStyle = 'rgba(255, 183, 3, 0.25)';
+      ctx.strokeStyle = COLORS.gold.main;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
       for (let i = 0; i < sides; i++) {
         const a = (i * 2 * Math.PI) / sides;
         const px = Math.cos(a) * p.radius;
@@ -1022,11 +1086,16 @@
       ctx.save();
       ctx.translate(p.x, p.y);
 
-      // Outer swirling neon glow
+      // Outer swirling neon aura
+      ctx.strokeStyle = 'rgba(181, 55, 242, 0.3)';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.arc(0, 0, p.radius + 2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Main ring
       ctx.strokeStyle = p.color;
       ctx.lineWidth = 3;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = 18;
       ctx.beginPath();
       ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
       ctx.stroke();
@@ -1062,11 +1131,9 @@
       ctx.scale(pulseScale, pulseScale);
 
       // Outer Glowing Ring
-      ctx.shadowColor = colorDef.glow;
-      ctx.shadowBlur = 20;
       ctx.fillStyle = colorDef.glow;
       ctx.beginPath();
-      ctx.arc(0, 0, c.radius + 3, 0, Math.PI * 2);
+      ctx.arc(0, 0, c.radius + 5, 0, Math.PI * 2);
       ctx.fill();
 
       // Faceted Hexagon Crystal
@@ -1129,13 +1196,11 @@
       const colorDef = COLORS[orb.colorType] || COLORS.cyan;
 
       ctx.save();
-      ctx.shadowColor = colorDef.glow;
-      ctx.shadowBlur = 22;
 
-      // Outer Corona
+      // Outer Corona (Crisp concentric aura instead of shadowBlur)
       ctx.fillStyle = colorDef.glow;
       ctx.beginPath();
-      ctx.arc(orb.x, orb.y, orb.radius + 4, 0, Math.PI * 2);
+      ctx.arc(orb.x, orb.y, orb.radius + 6, 0, Math.PI * 2);
       ctx.fill();
 
       // Main Core
@@ -1179,10 +1244,18 @@
       const pullX = drag.currentX - drag.anchorX;
       const pullY = drag.currentY - drag.anchorY;
 
+      // Outer sling halo
+      ctx.strokeStyle = 'rgba(0, 243, 255, 0.3)';
+      ctx.lineWidth = 7;
+      ctx.beginPath();
+      ctx.moveTo(-25, 0);
+      ctx.lineTo(pullX, pullY);
+      ctx.lineTo(25, 0);
+      ctx.stroke();
+
+      // Inner sling line
       ctx.strokeStyle = COLORS.cyan.main;
-      ctx.lineWidth = 3;
-      ctx.shadowColor = COLORS.cyan.glow;
-      ctx.shadowBlur = 10;
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(-25, 0);
       ctx.lineTo(pullX, pullY);
@@ -1211,9 +1284,6 @@
     let simVy = pullY * LAUNCH_SPEED_FACTOR;
 
     ctx.save();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.shadowColor = COLORS.cyan.glow;
-    ctx.shadowBlur = 8;
 
     const maxSteps = 45;
     for (let s = 0; s < maxSteps; s++) {
@@ -1228,9 +1298,19 @@
         simVy = -simVy;
       }
 
-      // Draw dashed trajectory dot
+      // Draw dashed trajectory dot (Layered hardware acceleration, 0 shadowBlur)
       if (s % 3 === 0) {
         const radius = Math.max(1.5, 4.5 * (1 - s / maxSteps));
+        const alpha = Math.max(0.2, 1 - (s / maxSteps));
+
+        // Outer cyan glow dot
+        ctx.fillStyle = `rgba(0, 243, 255, ${alpha * 0.45})`;
+        ctx.beginPath();
+        ctx.arc(simX, simY, radius + 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner bright core dot
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
         ctx.beginPath();
         ctx.arc(simX, simY, radius, 0, Math.PI * 2);
         ctx.fill();
@@ -1254,8 +1334,6 @@
       ctx.save();
       ctx.fillStyle = p.color;
       ctx.globalAlpha = p.alpha;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = 8;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fill();
@@ -1278,8 +1356,6 @@
       ctx.strokeStyle = s.color;
       ctx.globalAlpha = s.alpha;
       ctx.lineWidth = 3;
-      ctx.shadowColor = s.color;
-      ctx.shadowBlur = 12;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
       ctx.stroke();
@@ -1299,22 +1375,26 @@
       }
 
       ctx.save();
-      ctx.fillStyle = ft.color;
       ctx.globalAlpha = ft.alpha;
       ctx.font = 'bold 15px Outfit, Tajawal, sans-serif';
       ctx.textAlign = 'center';
-      ctx.shadowColor = ft.color;
-      ctx.shadowBlur = 10;
+
+      // Drop shadow for crisp contrast without shadowBlur
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillText(ft.text, ft.x + 1, ft.y + 1);
+
+      // Main color text
+      ctx.fillStyle = ft.color;
       ctx.fillText(ft.text, ft.x, ft.y);
       ctx.restore();
     }
   }
 
-  // --- Input Handlers (Touch & Mouse Unified) ---
+  // --- Input Handlers (PointerEvents Architecture) ---
   function getCanvasCoords(e) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const clientX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const clientY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     return {
       x: (clientX - rect.left) / scale,
       y: (clientY - rect.top) / scale
@@ -1324,22 +1404,34 @@
   function onPointerDown(e) {
     if (state.gameState !== 'AIMING') return;
 
+    // Prevent default gesture delays / scrolling
+    if (e.cancelable) e.preventDefault();
+
     const coords = getCanvasCoords(e);
     const distToAnchor = Math.hypot(coords.x - drag.anchorX, coords.y - drag.anchorY);
 
-    // Permit drag if touched anywhere in the bottom 40% of the screen
+    // Permit drag if touched near anchor or bottom 40% of playfield
     if (distToAnchor < 140 || coords.y > CANVAS_LOGICAL_HEIGHT * 0.6) {
       drag.active = true;
+      drag.pointerId = e.pointerId;
       drag.startX = coords.x;
       drag.startY = coords.y;
       drag.currentX = coords.x;
       drag.currentY = coords.y;
+
+      if (canvas.setPointerCapture && e.pointerId !== undefined) {
+        try {
+          canvas.setPointerCapture(e.pointerId);
+        } catch (_) {}
+      }
+
       triggerHaptic('light');
     }
   }
 
   function onPointerMove(e) {
     if (!drag.active || state.gameState !== 'AIMING') return;
+    if (e.cancelable) e.preventDefault();
 
     const coords = getCanvasCoords(e);
     const dx = coords.x - drag.anchorX;
@@ -1356,9 +1448,19 @@
     }
   }
 
-  function onPointerUp() {
-    if (!drag.active || state.gameState !== 'AIMING') return;
+  function onPointerUp(e) {
+    if (!drag.active) return;
+    if (e && e.cancelable) e.preventDefault();
+
+    if (canvas.releasePointerCapture && e && e.pointerId !== undefined) {
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+    }
+
     drag.active = false;
+
+    if (state.gameState !== 'AIMING') return;
 
     const pullX = drag.anchorX - drag.currentX;
     const pullY = drag.anchorY - drag.currentY;
@@ -1371,16 +1473,28 @@
     }
   }
 
+  function onPointerCancel(e) {
+    if (drag.active) {
+      if (canvas.releasePointerCapture && e && e.pointerId !== undefined) {
+        try {
+          canvas.releasePointerCapture(e.pointerId);
+        } catch (_) {}
+      }
+      drag.active = false;
+    }
+  }
+
   // --- UI & Modal Event Bindings ---
   function setupUI() {
-    // Canvas Listeners
-    canvas.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('mouseup', onPointerUp);
+    // Modern Pointer Events with Pointer Capture
+    canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
+    canvas.addEventListener('pointermove', onPointerMove, { passive: false });
+    canvas.addEventListener('pointerup', onPointerUp, { passive: false });
+    canvas.addEventListener('pointercancel', onPointerCancel, { passive: false });
 
-    canvas.addEventListener('touchstart', onPointerDown, { passive: true });
-    window.addEventListener('touchmove', onPointerMove, { passive: true });
-    window.addEventListener('touchend', onPointerUp, { passive: true });
+    // Safety fallback listeners on window
+    window.addEventListener('pointerup', onPointerUp, { passive: false });
+    window.addEventListener('pointercancel', onPointerCancel, { passive: false });
 
     // Buttons
     document.getElementById('btn-play-game').onclick = () => {
