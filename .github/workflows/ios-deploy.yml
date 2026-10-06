@@ -44,7 +44,7 @@ jobs:
         run: |
           # Create temporary keychain
           KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain-db
-          KEYCHAIN_PASS=${KEYCHAIN_PASSWORD:-"temp_keychain_pass_123"}
+          KEYCHAIN_PASS=${KEYCHAIN_PASSWORD:-$(uuidgen)}
           security create-keychain -p "$KEYCHAIN_PASS" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASS" $KEYCHAIN_PATH
