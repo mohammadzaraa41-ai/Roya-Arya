@@ -39,7 +39,7 @@
   /* Responsive sizes & Apple Safe Area */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --header-height: calc(64px + var(--safe-top));
+  --header-height: calc(56px + var(--safe-top));
   --banner-height: calc(48px + var(--safe-bottom));
 }
 
@@ -88,14 +88,15 @@ html, body {
   left: 0;
   right: 0;
   height: var(--header-height);
-  padding: calc(10px + var(--safe-top)) 16px 10px 16px;
+  padding: calc(6px + var(--safe-top)) 14px 6px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 20;
-  background: linear-gradient(180deg, rgba(8, 9, 16, 0.95) 0%, rgba(8, 9, 16, 0) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(8, 9, 16, 0.92) 0%, rgba(8, 9, 16, 0.6) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .hud-left {
@@ -105,11 +106,11 @@ html, body {
 }
 
 .icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.06);
-  border: var(--neon-border);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-primary);
   display: flex;
   align-items: center;
@@ -127,79 +128,119 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .level-indicator .level-title {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 850;
   letter-spacing: 0.5px;
-  background: linear-gradient(90deg, var(--roya-cyan), var(--text-primary));
+  background: linear-gradient(90deg, var(--roya-cyan), #ffffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .score-display {
   display: flex;
-  gap: 6px;
-  font-size: 0.75rem;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
 .score-display .score-value {
   color: var(--prism-gold);
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .hud-right {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.gems-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 183, 3, 0.12);
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.gems-hud-pill:active {
+  transform: scale(0.94);
+  background: rgba(255, 183, 3, 0.25);
+}
+
+.gem-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.gem-amount {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--prism-gold);
 }
 
 .spirits-badge {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 5px 10px;
   border-radius: var(--radius-pill);
+  backdrop-filter: blur(10px);
 }
 
 .spirit-dot {
-  width: 22px;
-  height: 22px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 900;
-  color: #fff;
-  transition: all 0.3s ease;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.spirit-dot::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .spirit-roya {
-  background: var(--roya-cyan);
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--roya-cyan) 60%, #0088a8 100%);
   box-shadow: 0 0 10px var(--roya-glow);
 }
 
 .spirit-arya {
-  background: var(--arya-magenta);
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--arya-magenta) 60%, #99004d 100%);
   box-shadow: 0 0 10px var(--arya-glow);
 }
 
 .spirit-dot.inactive {
-  opacity: 0.3;
+  opacity: 0.22;
   box-shadow: none;
   filter: grayscale(1);
+  transform: scale(0.85);
 }
 
 .shots-count {
-  font-weight: 800;
-  font-size: 0.9rem;
+  font-weight: 900;
+  font-size: 0.95rem;
   color: #fff;
-  margin-right: 2px;
+  margin-inline-start: 3px;
+  font-family: var(--font-main);
 }
 
 /* ========================================================
@@ -365,28 +406,75 @@ html, body {
 }
 
 .avatar-spirit {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+}
+
+.avatar-roya .spirit-inner-core,
+.avatar-arya .spirit-inner-core {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  animation: floatOrb 3.2s ease-in-out infinite;
 }
 
 .avatar-roya .spirit-inner-core {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff 10%, var(--roya-cyan) 60%, #0077b6 100%);
-  box-shadow: 0 0 25px var(--roya-glow), inset 0 0 10px #fff;
-  animation: floatOrb 3s ease-in-out infinite;
+  box-shadow: 0 0 28px var(--roya-glow), inset 0 0 12px #fff;
+}
+
+.avatar-roya .spirit-inner-core::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 243, 255, 0.65);
+  transform: rotate(25deg) scaleY(0.48);
+  box-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+}
+
+.avatar-roya .spirit-inner-core::after {
+  content: '✦';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--roya-cyan);
 }
 
 .avatar-arya .spirit-inner-core {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff 10%, var(--arya-magenta) 60%, #800f2f 100%);
-  box-shadow: 0 0 25px var(--arya-glow), inset 0 0 10px #fff;
-  animation: floatOrb 3s ease-in-out infinite 1.5s;
+  box-shadow: 0 0 28px var(--arya-glow), inset 0 0 12px #fff;
+  animation-delay: 1.6s;
+}
+
+.avatar-arya .spirit-inner-core::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 0, 127, 0.65);
+  transform: rotate(-25deg) scaleY(0.48);
+  box-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+}
+
+.avatar-arya .spirit-inner-core::after {
+  content: '✺';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--arya-magenta);
 }
 
 @keyframes floatOrb {

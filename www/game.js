@@ -1703,33 +1703,81 @@
         ctx.restore();
       }
 
-      // Draw Main Orb (Hardware-accelerated concentric arcs)
+      // Draw Main Spirit Orb (Celestial Radiant Sphere without plain letters)
       const colorDef = COLORS[orb.colorType] || COLORS.cyan;
+      const now = Date.now();
+      const pulse = Math.sin(now / 260 + (orb.id === 'roya' ? 0 : 2.6)) * 2.2;
+      const outerR = orb.radius + 8 + pulse;
 
-      // Outer Glow Aura
-      ctx.fillStyle = colorDef.glow;
+      // 1. Multi-stop Ethereal Plasma Aura
+      const aura = ctx.createRadialGradient(orb.x, orb.y, orb.radius * 0.3, orb.x, orb.y, outerR);
+      aura.addColorStop(0, colorDef.glow);
+      aura.addColorStop(0.65, colorDef.glow.replace('0.65', '0.2').replace('0.75', '0.25'));
+      aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = aura;
       ctx.beginPath();
-      ctx.arc(orb.x, orb.y, orb.radius + 5, 0, Math.PI * 2);
+      ctx.arc(orb.x, orb.y, outerR, 0, Math.PI * 2);
       ctx.fill();
 
-      // Main Orb Body
-      ctx.fillStyle = colorDef.main;
+      // 2. Rotating Celestial Orbital Ring & Bead
+      ctx.save();
+      ctx.translate(orb.x, orb.y);
+      const ringRot = (now / 550) * (orb.id === 'roya' ? 1.2 : -1.2);
+      ctx.rotate(ringRot);
+      ctx.strokeStyle = colorDef.main;
+      ctx.lineWidth = 1.3;
+      ctx.globalAlpha = 0.65;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, orb.radius + 4.5, orb.radius * 0.42, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Orbital energy star bead
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.95;
+      ctx.beginPath();
+      ctx.arc(orb.radius + 4.5, 0, 2.0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 3. 3D Spherical Illuminated Crystal Body
+      const bodyGrad = ctx.createRadialGradient(
+        orb.x - orb.radius * 0.35,
+        orb.y - orb.radius * 0.35,
+        1,
+        orb.x,
+        orb.y,
+        orb.radius
+      );
+      bodyGrad.addColorStop(0, '#ffffff'); // Diamond white core
+      bodyGrad.addColorStop(0.28, colorDef.light || '#e0fbff');
+      bodyGrad.addColorStop(0.68, colorDef.main);
+      bodyGrad.addColorStop(1, '#080a14'); // Rich 3D shadow rim
+      ctx.fillStyle = bodyGrad;
       ctx.beginPath();
       ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Sharp Hot White Core
+      // 4. Specular Diamond Twinkle / Lens Glint
+      const hx = orb.x - orb.radius * 0.35;
+      const hy = orb.y - orb.radius * 0.35;
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(orb.x - 2, orb.y - 2, orb.radius * 0.45, 0, Math.PI * 2);
+      ctx.arc(hx, hy, orb.radius * 0.22, 0, Math.PI * 2);
       ctx.fill();
 
-      // Identifier Letter
-      ctx.fillStyle = '#060810';
-      ctx.font = '900 10px Outfit, sans-serif';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(hx - 3.5, hy); ctx.lineTo(hx + 3.5, hy);
+      ctx.moveTo(hx, hy - 3.5); ctx.lineTo(hx, hy + 3.5);
+      ctx.stroke();
+
+      // 5. Mystical Spirit Nucleus Glyphs (Soft glowing celestial symbols, NO black letters)
+      ctx.fillStyle = orb.id === 'roya' ? 'rgba(0, 243, 255, 0.95)' : 'rgba(255, 0, 127, 0.95)';
+      ctx.font = '10px Outfit, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(orb.id === 'roya' ? 'R' : 'A', orb.x, orb.y);
+      ctx.fillText(orb.id === 'roya' ? '✦' : '✺', orb.x, orb.y + 0.5);
     });
   }
 
@@ -2134,6 +2182,7 @@
     if (e.cancelable) e.preventDefault();
 
     const coords = getCanvasCoords(e);
+    if (gestureHint) gestureHint.classList.add('hidden');
     drag.active = true;
     drag.pointerId = e.pointerId;
     drag.startX = coords.x;
