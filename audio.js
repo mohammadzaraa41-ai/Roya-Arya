@@ -16,7 +16,11 @@ class SoundEngine {
       587.33, // D5
       659.25, // E5
       783.99, // G5
-      880.00  // A5
+      880.00, // A5
+      1046.50,// C6
+      1174.66,// D6
+      1318.51,// E6
+      1567.98 // G6
     ];
   }
 
@@ -224,6 +228,91 @@ class SoundEngine {
 
       osc.start(startTime);
       osc.stop(startTime + 0.31);
+    });
+  }
+
+  // Harmonic Dual Chord when Plasma Tether slices crystals
+  playResonanceHit() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    [523.25, 783.99].forEach(freq => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.25, t + 0.15);
+
+      gain.gain.setValueAtTime(0.18, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.29);
+    });
+  }
+
+  // Low frequency tension drone for Slow-Mo entry
+  playSlowMoTension() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(130, t);
+    osc.frequency.exponentialRampToValueAtTime(70, t + 0.55);
+
+    gain.gain.setValueAtTime(0.28, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(t);
+    osc.stop(t + 0.62);
+  }
+
+  // Epic shatter burst sound when final crystal breaks
+  playEpicClear() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    // Sub bass drop
+    const bass = this.ctx.createOscillator();
+    const bassGain = this.ctx.createGain();
+    bass.type = 'triangle';
+    bass.frequency.setValueAtTime(220, t);
+    bass.frequency.exponentialRampToValueAtTime(55, t + 0.4);
+    bassGain.gain.setValueAtTime(0.4, t);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+    bass.connect(bassGain);
+    bassGain.connect(this.ctx.destination);
+    bass.start(t);
+    bass.stop(t + 0.46);
+
+    // Shimmer chord
+    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, t + i * 0.04);
+      gain.gain.setValueAtTime(0.2, t + i * 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t + i * 0.04);
+      osc.stop(t + 0.52);
     });
   }
 }

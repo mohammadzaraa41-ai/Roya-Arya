@@ -61,7 +61,11 @@
         adsWatched: 0
       }
     },
-    gameMode: 'campaign' // 'campaign' or 'endless'
+    gameMode: 'campaign', // 'campaign' or 'endless'
+    timeScale: 1.0,
+    slowMoTimer: 0,
+    resonanceActive: false,
+    finalSlowMoTriggered: false
   };
 
   // Achievements Definition with Targets and Rewards
@@ -309,6 +313,10 @@
     state.currentCombo = 0;
     state.maxCombo = 0;
     state.gameState = 'AIMING';
+    state.timeScale = 1.0;
+    state.slowMoTimer = 0;
+    state.resonanceActive = false;
+    state.finalSlowMoTriggered = false;
 
     orbs = [];
     crystals = [];
@@ -460,6 +468,15 @@
     }
   }
 
+  // --- Geometric Helpers ---
+  function distToSegment(px, py, x1, y1, x2, y2) {
+    const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+    if (l2 === 0) return Math.hypot(px - x1, py - y1);
+    let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+  }
+
   // --- Physics & Collision Engine ---
   function updatePhysics(dt) {
     if (state.gameState !== 'FLYING') return;
@@ -469,6 +486,32 @@
     if (state.flightSafetyTimer > 7.5) {
       handleFlightEnd();
       return;
+    }
+
+    // Slow-Mo Duration Watchdog
+    if (state.slowMoTimer > 0) {
+      state.slowMoTimer -= dt;
+      if (state.slowMoTimer <= 0) {
+        state.timeScale = 1.0;
+      }
+    }
+
+    // Detect Final Crystal Approach for Cinematic Slow-Motion
+    if (crystals.length === 1 && state.slowMoTimer <= 0 && !state.finalSlowMoTriggered) {
+      const target = crystals[0];
+      for (let o = 0; o < orbs.length; o++) {
+        const orb = orbs[o];
+        if (!orb.active) continue;
+        const d = Math.hypot(orb.x - target.x, orb.y - target.y);
+        if (d < 75) {
+          state.slowMoTimer = 0.9;
+          state.timeScale = 0.24;
+          state.finalSlowMoTriggered = true;
+          if (window.soundEngine.playSlowMoTension) window.soundEngine.playSlowMoTension();
+          triggerHaptic('light');
+          break;
+        }
+      }
     }
 
     let allStopped = true;
@@ -489,6 +532,38 @@
         orbs[1].vy = orbs[1].pendingVy;
         orbs[1].active = true;
       }
+    }
+
+    // Twin Spirits Synergy Resonance Tether (Electric cutting beam)
+    if (orbs[0] && orbs[1] && orbs[0].active && orbs[1].active) {
+      const o1 = orbs[0];
+      const o2 = orbs[1];
+      const tetherDist = Math.hypot(o1.x - o2.x, o1.y - o2.y);
+
+      if (tetherDist < 190 && tetherDist > 15) {
+        state.resonanceActive = true;
+
+        for (let c = crystals.length - 1; c >= 0; c--) {
+          const crystal = crystals[c];
+          crystal.tetherCooldown = (crystal.tetherCooldown || 0) - dt;
+
+          if (crystal.tetherCooldown <= 0) {
+            const dLine = distToSegment(crystal.x, crystal.y, o1.x, o1.y, o2.x, o2.y);
+            if (dLine < crystal.radius + 7) {
+              crystal.tetherCooldown = 0.35;
+              damageCrystal(crystal, c, { id: 'resonance', colorType: 'synergy' });
+              addFloatingText('⚡ RESONANCE!', crystal.x, crystal.y - 25, COLORS.synergy.main);
+              createParticleBurst(crystal.x, crystal.y, COLORS.synergy.main, 16);
+              if (window.soundEngine.playResonanceHit) window.soundEngine.playResonanceHit();
+              triggerHaptic('heavy');
+            }
+          }
+        }
+      } else {
+        state.resonanceActive = false;
+      }
+    } else {
+      state.resonanceActive = false;
     }
 
     orbs.forEach(orb => {
@@ -722,6 +797,38 @@
     triggerHaptic('heavy');
     addTrauma(0.22);
 
+    // Roya Piercing Power (Cyan)
+    if (orb && orb.id === 'roya') {
+      orb.vx *= 1.05;
+      orb.vy *= 1.05;
+      createParticleBurst(crystal.x, crystal.y, COLORS.cyan.main, 12);
+      addFloatingText('✦ PIERCE!', crystal.x, crystal.y - 15, COLORS.cyan.main);
+    }
+
+    // Arya Kinetic Shockwave Splash (Magenta)
+    if (orb && orb.id === 'arya') {
+      shockwaves.push({
+        x: crystal.x,
+        y: crystal.y,
+        radius: 8,
+        maxRadius: 70,
+        color: COLORS.magenta.main,
+        alpha: 0.95
+      });
+      // Splash damage to neighboring crystals within 65px
+      crystals.forEach((adj, adjIdx) => {
+        if (adj !== crystal && Math.hypot(adj.x - crystal.x, adj.y - crystal.y) < 65) {
+          adj.hp--;
+          createParticleBurst(adj.x, adj.y, COLORS.magenta.main, 10);
+          addFloatingText('💥 SPLASH!', adj.x, adj.y - 12, COLORS.magenta.main);
+          if (adj.hp <= 0) {
+            crystals.splice(adjIdx, 1);
+            addGems(1, false);
+          }
+        }
+      });
+    }
+
     const pts = 100 * state.currentCombo;
     state.score += pts;
     updateHud();
@@ -743,6 +850,33 @@
     state.savedProgress.stats.totalCrystalsBroken = (state.savedProgress.stats.totalCrystalsBroken || 0) + 1;
     if (state.savedProgress.stats.totalCrystalsBroken >= 30) {
       checkUnlockAchievement('crystal_hunter');
+    }
+
+    // Final crystal epic cinematic shatter
+    if (crystals.length === 1 && crystal.hp <= 0) {
+      state.timeScale = 1.0;
+      state.slowMoTimer = 0;
+      addTrauma(0.5);
+      createParticleBurst(crystal.x, crystal.y, '#ffffff', 45);
+      createParticleBurst(crystal.x, crystal.y, COLORS.gold.main, 35);
+      shockwaves.push({
+        x: crystal.x,
+        y: crystal.y,
+        radius: 12,
+        maxRadius: 190,
+        color: '#00f3ff',
+        alpha: 1.0
+      });
+      shockwaves.push({
+        x: crystal.x,
+        y: crystal.y,
+        radius: 6,
+        maxRadius: 150,
+        color: '#ff007f',
+        alpha: 1.0
+      });
+      addFloatingText('✨ EPIC CLEAR! ✨', crystal.x, crystal.y - 30, '#ffb703');
+      if (window.soundEngine.playEpicClear) window.soundEngine.playEpicClear();
     }
 
     if (crystal.hp <= 0) {
@@ -938,6 +1072,7 @@
 
     // Draw Spirits (Roya & Arya)
     drawSpirits();
+    drawResonanceTether();
 
     // Draw Particles & Shockwaves
     drawParticles();
@@ -1294,10 +1429,25 @@
     const maxSteps = 45;
     let hitX = simX;
     let hitY = simY;
+    let targetedCrystal = null;
 
     for (let s = 0; s < maxSteps; s++) {
       simX += simVx;
       simY += simVy;
+
+      // Check collision with crystals along simulated ray
+      if (!targetedCrystal) {
+        for (let c = 0; c < crystals.length; c++) {
+          const cr = crystals[c];
+          if (Math.hypot(simX - cr.x, simY - cr.y) < cr.radius + 6) {
+            targetedCrystal = cr;
+            hitX = cr.x;
+            hitY = cr.y;
+            break;
+          }
+        }
+        if (targetedCrystal) break;
+      }
 
       // Bounce check with screen boundaries
       if (simX <= 18) {
@@ -1321,10 +1471,10 @@
 
     ctx.lineTo(hitX, hitY);
 
-    // Glowing laser beam (Single dashed path, maximum performance)
+    // Glowing laser beam
     ctx.setLineDash([10, 8]);
     ctx.lineWidth = 3.5;
-    ctx.strokeStyle = 'rgba(0, 243, 255, 0.45)';
+    ctx.strokeStyle = targetedCrystal ? 'rgba(255, 0, 127, 0.55)' : 'rgba(0, 243, 255, 0.45)';
     ctx.stroke();
 
     ctx.lineWidth = 1.5;
@@ -1332,16 +1482,89 @@
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Targeting reticle at terminus
-    ctx.strokeStyle = COLORS.cyan.main;
-    ctx.lineWidth = 2;
+    // If a crystal is targeted, draw a high-tech lock-on reticle around it
+    if (targetedCrystal) {
+      const crColor = COLORS[targetedCrystal.color] ? COLORS[targetedCrystal.color].main : '#00f3ff';
+      ctx.strokeStyle = crColor;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(targetedCrystal.x, targetedCrystal.y, targetedCrystal.radius + 7, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Precision crosshairs
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      const tr = targetedCrystal.radius + 12;
+      ctx.beginPath();
+      ctx.moveTo(targetedCrystal.x - tr, targetedCrystal.y);
+      ctx.lineTo(targetedCrystal.x - tr + 5, targetedCrystal.y);
+      ctx.moveTo(targetedCrystal.x + tr, targetedCrystal.y);
+      ctx.lineTo(targetedCrystal.x + tr - 5, targetedCrystal.y);
+      ctx.moveTo(targetedCrystal.x, targetedCrystal.y - tr);
+      ctx.lineTo(targetedCrystal.x, targetedCrystal.y - tr + 5);
+      ctx.moveTo(targetedCrystal.x, targetedCrystal.y + tr);
+      ctx.lineTo(targetedCrystal.x, targetedCrystal.y + tr - 5);
+      ctx.stroke();
+
+      // Floating "LOCK-ON" tag
+      ctx.fillStyle = crColor;
+      ctx.font = 'bold 9px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('TARGET LOCK', targetedCrystal.x, targetedCrystal.y - targetedCrystal.radius - 12);
+    } else {
+      // Standard targeting reticle at terminus
+      ctx.strokeStyle = COLORS.cyan.main;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(hitX, hitY, 9, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(hitX, hitY, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  // Draw Twin Spirits Synergy Resonance Tether (Electric cutting beam)
+  function drawResonanceTether() {
+    if (!state.resonanceActive || !orbs[0] || !orbs[1] || !orbs[0].active || !orbs[1].active) return;
+    const o1 = orbs[0];
+    const o2 = orbs[1];
+
+    ctx.save();
+    // Pulsing outer aura
+    ctx.strokeStyle = 'rgba(181, 55, 242, 0.45)';
+    ctx.lineWidth = 7;
     ctx.beginPath();
-    ctx.arc(hitX, hitY, 9, 0, Math.PI * 2);
+    ctx.moveTo(o1.x, o1.y);
+    ctx.lineTo(o2.x, o2.y);
     ctx.stroke();
 
+    // Inner bright synergy laser
+    ctx.strokeStyle = COLORS.synergy.main;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(o1.x, o1.y);
+    ctx.lineTo(o2.x, o2.y);
+    ctx.stroke();
+
+    // Hot white core
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(o1.x, o1.y);
+    ctx.lineTo(o2.x, o2.y);
+    ctx.stroke();
+
+    // Electric plasma sparks along the tether
+    const midX = (o1.x + o2.x) / 2 + (Math.random() * 8 - 4);
+    const midY = (o1.y + o2.y) / 2 + (Math.random() * 8 - 4);
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(hitX, hitY, 3, 0, Math.PI * 2);
+    ctx.arc(midX, midY, 3, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -2005,10 +2228,13 @@
   // --- Game Loop ---
   let lastTime = performance.now();
   function gameLoop(now) {
-    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    const rawDt = Math.min((now - lastTime) / 1000, 0.1);
     lastTime = now;
 
-    updatePhysics(dt);
+    // Apply dynamic Slow-Mo cinematic time dilation
+    const effectiveDt = rawDt * (state.timeScale || 1.0);
+
+    updatePhysics(effectiveDt);
     render();
 
     requestAnimationFrame(gameLoop);
