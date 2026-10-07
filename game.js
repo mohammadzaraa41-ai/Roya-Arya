@@ -96,7 +96,7 @@
     currentX: 0,
     currentY: 0,
     anchorX: CANVAS_LOGICAL_WIDTH / 2,
-    anchorY: CANVAS_LOGICAL_HEIGHT - 65
+    anchorY: CANVAS_LOGICAL_HEIGHT - 125
   };
 
   // Screen Shake (Trauma)
@@ -222,6 +222,8 @@
 
   // --- Canvas Resolution & Resize ---
   let scale = 1;
+  let offsetX = 0;
+  let offsetY = 0;
   function resizeCanvas() {
     const rect = canvasWrapper.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -231,8 +233,11 @@
 
     scale = Math.min(rect.width / CANVAS_LOGICAL_WIDTH, rect.height / CANVAS_LOGICAL_HEIGHT);
 
+    offsetX = (rect.width - CANVAS_LOGICAL_WIDTH * scale) / 2;
+    offsetY = Math.max(0, (rect.height - CANVAS_LOGICAL_HEIGHT * scale) / 2);
+
     drag.anchorX = CANVAS_LOGICAL_WIDTH / 2;
-    drag.anchorY = CANVAS_LOGICAL_HEIGHT - 65;
+    drag.anchorY = CANVAS_LOGICAL_HEIGHT - 125;
   }
 
   // --- Screen Shake & Haptic Helpers ---
@@ -899,10 +904,8 @@
 
   // --- Rendering Loop ---
   function render() {
-    // Handle Canvas Resolution scale
-    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-    ctx.save();
-    ctx.scale(scale * dpr, scale * dpr);
+    // Clear entire canvas buffer cleanly (zero ghosting/artifacts)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Apply Screen Shake (Trauma Decay)
     if (screenTrauma > 0) {
@@ -913,13 +916,13 @@
       shakeOffsetX = 0;
       shakeOffsetY = 0;
     }
-    ctx.translate(shakeOffsetX, shakeOffsetY);
 
-    // Clear Canvas with subtle deep vignette
-    ctx.clearRect(-20, -20, CANVAS_LOGICAL_WIDTH + 40, CANVAS_LOGICAL_HEIGHT + 40);
-
-    // Draw Subtle Tech Grid Background
-    drawGridBackground();
+    // Set up hardware-accelerated scaled & centered game viewport
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.translate(offsetX + shakeOffsetX, offsetY + shakeOffsetY);
+    ctx.scale(scale, scale);
 
     // Draw Level Entities
     drawWalls();
@@ -944,26 +947,6 @@
     // Draw Launcher Base Pad
     drawLauncherPad();
 
-    ctx.restore();
-  }
-
-  function drawGridBackground() {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
-    ctx.lineWidth = 1;
-    const step = 35;
-    for (let x = 0; x < CANVAS_LOGICAL_WIDTH; x += step) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, CANVAS_LOGICAL_HEIGHT);
-      ctx.stroke();
-    }
-    for (let y = 0; y < CANVAS_LOGICAL_HEIGHT; y += step) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(CANVAS_LOGICAL_WIDTH, y);
-      ctx.stroke();
-    }
     ctx.restore();
   }
 
@@ -1186,50 +1169,48 @@
     }
 
     orbs.forEach(orb => {
-      // Draw Motion Trails
-      orb.trail.forEach((t, i) => {
-        ctx.save();
-        ctx.fillStyle = t.color;
-        ctx.globalAlpha = (i / orb.trail.length) * 0.45;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, t.radius * (i / orb.trail.length), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      });
+      // Draw Motion Trails (Fast batch render without per-particle save/restore)
+      const trailLen = orb.trail.length;
+      if (trailLen > 0) {
+        for (let i = 0; i < trailLen; i++) {
+          const t = orb.trail[i];
+          const progress = (i + 1) / trailLen;
+          ctx.fillStyle = t.color;
+          ctx.globalAlpha = progress * 0.38;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, Math.max(1, t.radius * progress), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+      }
 
-      // Draw Main Orb
+      // Draw Main Orb (Hardware-accelerated concentric arcs)
       const colorDef = COLORS[orb.colorType] || COLORS.cyan;
 
-      ctx.save();
-
-      // Outer Corona (Crisp concentric aura instead of shadowBlur)
+      // Outer Glow Aura
       ctx.fillStyle = colorDef.glow;
       ctx.beginPath();
-      ctx.arc(orb.x, orb.y, orb.radius + 6, 0, Math.PI * 2);
+      ctx.arc(orb.x, orb.y, orb.radius + 5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Main Core
-      const grad = ctx.createRadialGradient(
-        orb.x - 3, orb.y - 3, 2,
-        orb.x, orb.y, orb.radius
-      );
-      grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.5, colorDef.main);
-      grad.addColorStop(1, '#060a17');
-
-      ctx.fillStyle = grad;
+      // Main Orb Body
+      ctx.fillStyle = colorDef.main;
       ctx.beginPath();
       ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Ethereal Eye / Identifier
-      ctx.fillStyle = '#fff';
+      // Sharp Hot White Core
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(orb.x - 2, orb.y - 2, orb.radius * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Identifier Letter
+      ctx.fillStyle = '#060810';
       ctx.font = '900 10px Outfit, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(orb.id === 'roya' ? 'R' : 'A', orb.x, orb.y);
-
-      ctx.restore();
     });
   }
 
@@ -1238,89 +1219,131 @@
     ctx.translate(drag.anchorX, drag.anchorY);
 
     // Glowing base ring
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(0, 243, 255, 0.3)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(0, 0, 34, 0, Math.PI * 2);
+    ctx.arc(0, 0, 32, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Pull Sling Band
+    // Inner bright ring
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, 0, 24, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Aim guide / Pull Band
     if (drag.active && state.gameState === 'AIMING') {
-      const pullX = drag.currentX - drag.anchorX;
-      const pullY = drag.currentY - drag.anchorY;
+      const aim = getAimVector();
+      if (aim) {
+        if (aim.mode === 'slingshot') {
+          const pullX = drag.currentX - drag.anchorX;
+          const pullY = drag.currentY - drag.anchorY;
 
-      // Outer sling halo
-      ctx.strokeStyle = 'rgba(0, 243, 255, 0.3)';
-      ctx.lineWidth = 7;
-      ctx.beginPath();
-      ctx.moveTo(-25, 0);
-      ctx.lineTo(pullX, pullY);
-      ctx.lineTo(25, 0);
-      ctx.stroke();
+          // Sling elastic line
+          ctx.strokeStyle = COLORS.cyan.main;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(-22, 0);
+          ctx.lineTo(pullX, pullY);
+          ctx.lineTo(22, 0);
+          ctx.stroke();
 
-      // Inner sling line
-      ctx.strokeStyle = COLORS.cyan.main;
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(-25, 0);
-      ctx.lineTo(pullX, pullY);
-      ctx.lineTo(25, 0);
-      ctx.stroke();
+          // Grip Center
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(pullX, pullY, 8, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Direct aim indicator arrow
+          const arrowLen = 28;
+          const tipX = aim.normX * arrowLen;
+          const tipY = aim.normY * arrowLen;
 
-      // Glowing Grip Center
-      ctx.fillStyle = '#fff';
-      ctx.beginPath();
-      ctx.arc(pullX, pullY, 8, 0, Math.PI * 2);
-      ctx.fill();
+          ctx.strokeStyle = COLORS.cyan.main;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(tipX, tipY);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(tipX, tipY, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     }
 
     ctx.restore();
   }
 
   function drawPredictiveTrajectory() {
-    const pullX = drag.anchorX - drag.currentX;
-    const pullY = drag.anchorY - drag.currentY;
-    const dist = Math.hypot(pullX, pullY);
-    if (dist < 10) return;
+    const aim = getAimVector();
+    if (!aim) return;
 
     let simX = drag.anchorX;
     let simY = drag.anchorY;
-    let simVx = pullX * LAUNCH_SPEED_FACTOR;
-    let simVy = pullY * LAUNCH_SPEED_FACTOR;
+    let simVx = aim.vx;
+    let simVy = aim.vy;
 
     ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(simX, simY);
 
     const maxSteps = 45;
+    let hitX = simX;
+    let hitY = simY;
+
     for (let s = 0; s < maxSteps; s++) {
       simX += simVx;
       simY += simVy;
 
       // Bounce check with screen boundaries
-      if (simX <= 18 || simX >= CANVAS_LOGICAL_WIDTH - 18) {
+      if (simX <= 18) {
+        simX = 18;
         simVx = -simVx;
+        ctx.lineTo(simX, simY);
+      } else if (simX >= CANVAS_LOGICAL_WIDTH - 18) {
+        simX = CANVAS_LOGICAL_WIDTH - 18;
+        simVx = -simVx;
+        ctx.lineTo(simX, simY);
       }
       if (simY <= 20) {
+        simY = 20;
         simVy = -simVy;
+        ctx.lineTo(simX, simY);
       }
 
-      // Draw dashed trajectory dot (Layered hardware acceleration, 0 shadowBlur)
-      if (s % 3 === 0) {
-        const radius = Math.max(1.5, 4.5 * (1 - s / maxSteps));
-        const alpha = Math.max(0.2, 1 - (s / maxSteps));
-
-        // Outer cyan glow dot
-        ctx.fillStyle = `rgba(0, 243, 255, ${alpha * 0.45})`;
-        ctx.beginPath();
-        ctx.arc(simX, simY, radius + 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Inner bright core dot
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
-        ctx.beginPath();
-        ctx.arc(simX, simY, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      hitX = simX;
+      hitY = simY;
     }
+
+    ctx.lineTo(hitX, hitY);
+
+    // Glowing laser beam (Single dashed path, maximum performance)
+    ctx.setLineDash([10, 8]);
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = 'rgba(0, 243, 255, 0.45)';
+    ctx.stroke();
+
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Targeting reticle at terminus
+    ctx.strokeStyle = COLORS.cyan.main;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(hitX, hitY, 9, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(hitX, hitY, 3, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.restore();
   }
 
@@ -1336,14 +1359,13 @@
         continue;
       }
 
-      ctx.save();
       ctx.fillStyle = p.color;
-      ctx.globalAlpha = p.alpha;
+      ctx.globalAlpha = Math.max(0, p.alpha);
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.restore();
     }
+    ctx.globalAlpha = 1.0;
   }
 
   function drawShockwaves() {
@@ -1357,15 +1379,14 @@
         continue;
       }
 
-      ctx.save();
       ctx.strokeStyle = s.color;
-      ctx.globalAlpha = s.alpha;
+      ctx.globalAlpha = Math.max(0, s.alpha);
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.restore();
     }
+    ctx.globalAlpha = 1.0;
   }
 
   function drawFloatingTexts() {
@@ -1380,7 +1401,7 @@
       }
 
       ctx.save();
-      ctx.globalAlpha = ft.alpha;
+      ctx.globalAlpha = Math.max(0, ft.alpha);
       ctx.font = 'bold 15px Outfit, Tajawal, sans-serif';
       ctx.textAlign = 'center';
 
@@ -1401,8 +1422,51 @@
     const clientX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
     const clientY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     return {
-      x: (clientX - rect.left) / scale,
-      y: (clientY - rect.top) / scale
+      x: (clientX - rect.left - offsetX) / scale,
+      y: (clientY - rect.top - offsetY) / scale
+    };
+  }
+
+  function getAimVector() {
+    if (!drag.active) return null;
+
+    const dx = drag.currentX - drag.anchorX;
+    const dy = drag.currentY - drag.anchorY;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist < 10) return null; // Deadzone to avoid accidental taps
+
+    let vx, vy;
+    if (dy > 0) {
+      // Slingshot mode: pulling down launches forward/upward
+      vx = -dx;
+      vy = -dy;
+    } else {
+      // Direct aim mode: dragging/pointing upward aims directly at target
+      vx = dx;
+      vy = dy;
+    }
+
+    const aimDist = Math.hypot(vx, vy);
+    if (aimDist === 0) return null;
+
+    let normX = vx / aimDist;
+    let normY = vy / aimDist;
+
+    // Ensure spirits always fire upwards into the arena (normY <= -0.15)
+    if (normY > -0.15) {
+      normY = -0.15;
+      normX = (normX >= 0 ? 1 : -1) * Math.sqrt(Math.max(0, 1 - normY * normY));
+    }
+
+    const LAUNCH_SPEED = 13.5;
+    return {
+      vx: normX * LAUNCH_SPEED,
+      vy: normY * LAUNCH_SPEED,
+      normX,
+      normY,
+      dist,
+      mode: dy > 0 ? 'slingshot' : 'direct'
     };
   }
 
@@ -1413,25 +1477,20 @@
     if (e.cancelable) e.preventDefault();
 
     const coords = getCanvasCoords(e);
-    const distToAnchor = Math.hypot(coords.x - drag.anchorX, coords.y - drag.anchorY);
+    drag.active = true;
+    drag.pointerId = e.pointerId;
+    drag.startX = coords.x;
+    drag.startY = coords.y;
+    drag.currentX = coords.x;
+    drag.currentY = coords.y;
 
-    // Permit drag if touched near anchor or bottom 40% of playfield
-    if (distToAnchor < 140 || coords.y > CANVAS_LOGICAL_HEIGHT * 0.6) {
-      drag.active = true;
-      drag.pointerId = e.pointerId;
-      drag.startX = coords.x;
-      drag.startY = coords.y;
-      drag.currentX = coords.x;
-      drag.currentY = coords.y;
-
-      if (canvas.setPointerCapture && e.pointerId !== undefined) {
-        try {
-          canvas.setPointerCapture(e.pointerId);
-        } catch (_) {}
-      }
-
-      triggerHaptic('light');
+    if (canvas.setPointerCapture && e.pointerId !== undefined) {
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch (_) {}
     }
+
+    triggerHaptic('light');
   }
 
   function onPointerMove(e) {
@@ -1439,18 +1498,8 @@
     if (e.cancelable) e.preventDefault();
 
     const coords = getCanvasCoords(e);
-    const dx = coords.x - drag.anchorX;
-    const dy = coords.y - drag.anchorY;
-    const dist = Math.hypot(dx, dy);
-
-    if (dist > MAX_DRAG_DIST) {
-      const angle = Math.atan2(dy, dx);
-      drag.currentX = drag.anchorX + Math.cos(angle) * MAX_DRAG_DIST;
-      drag.currentY = drag.anchorY + Math.sin(angle) * MAX_DRAG_DIST;
-    } else {
-      drag.currentX = coords.x;
-      drag.currentY = coords.y;
-    }
+    drag.currentX = coords.x;
+    drag.currentY = coords.y;
   }
 
   function onPointerUp(e) {
@@ -1467,14 +1516,9 @@
 
     if (state.gameState !== 'AIMING') return;
 
-    const pullX = drag.anchorX - drag.currentX;
-    const pullY = drag.anchorY - drag.currentY;
-    const dist = Math.hypot(pullX, pullY);
-
-    if (dist > 18) {
-      const vx = pullX * LAUNCH_SPEED_FACTOR;
-      const vy = pullY * LAUNCH_SPEED_FACTOR;
-      fireTwinSpirits(vx, vy);
+    const aim = getAimVector();
+    if (aim) {
+      fireTwinSpirits(aim.vx, aim.vy);
     }
   }
 
@@ -1493,6 +1537,7 @@
   function setupUI() {
     // Modern Pointer Events with Pointer Capture
     canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
+    canvasWrapper.addEventListener('pointerdown', onPointerDown, { passive: false });
     canvas.addEventListener('pointermove', onPointerMove, { passive: false });
     canvas.addEventListener('pointerup', onPointerUp, { passive: false });
     canvas.addEventListener('pointercancel', onPointerCancel, { passive: false });

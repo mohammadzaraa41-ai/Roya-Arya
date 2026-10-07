@@ -209,10 +209,19 @@ html, body {
   position: relative;
   flex: 1;
   width: 100%;
-  height: calc(100% - var(--banner-height));
+  height: calc(100% - var(--header-height));
   margin-top: var(--header-height);
   overflow: hidden;
-  background: transparent;
+  background-color: #060810;
+  background-image: 
+    linear-gradient(rgba(0, 243, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.035) 1px, transparent 1px);
+  background-size: 35px 35px;
+  background-position: center;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #game-canvas {
