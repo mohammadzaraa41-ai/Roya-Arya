@@ -1657,10 +1657,31 @@
   }
 
   function drawSpirits() {
-    // Draw connecting tether when resting
+    let pullOffsetX = 0;
+    let pullOffsetY = 0;
+    if (state.gameState === 'AIMING' && drag.active) {
+      const aim = getAimVector();
+      if (aim && aim.mode === 'slingshot') {
+        pullOffsetX = aim.visualPullX;
+        pullOffsetY = aim.visualPullY;
+      }
+    }
+
+    if (state.gameState === 'AIMING') {
+      if (orbs[0]) {
+        orbs[0].x = drag.anchorX - 18 + pullOffsetX;
+        orbs[0].y = drag.anchorY + pullOffsetY;
+      }
+      if (orbs[1]) {
+        orbs[1].x = drag.anchorX + 18 + pullOffsetX;
+        orbs[1].y = drag.anchorY + pullOffsetY;
+      }
+    }
+
+    // Draw connecting tether when resting / pulled
     if (state.gameState === 'AIMING' && orbs[0] && orbs[1]) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
@@ -1804,26 +1825,39 @@
       const aim = getAimVector();
       if (aim) {
         if (aim.mode === 'slingshot') {
-          const pullX = drag.currentX - drag.anchorX;
-          const pullY = drag.currentY - drag.anchorY;
+          const o1 = orbs[0];
+          const o2 = orbs[1];
+          const rx = (o1 ? o1.x : drag.anchorX - 18) - drag.anchorX;
+          const ry = (o1 ? o1.y : drag.anchorY) - drag.anchorY;
+          const ax = (o2 ? o2.x : drag.anchorX + 18) - drag.anchorX;
+          const ay = (o2 ? o2.y : drag.anchorY) - drag.anchorY;
 
-          // Sling elastic line
-          ctx.strokeStyle = COLORS.cyan.main;
-          ctx.lineWidth = 3;
+          // Slingshot elastic band left to Roya
+          ctx.strokeStyle = 'rgba(0, 243, 255, 0.85)';
+          ctx.lineWidth = 3.5;
           ctx.beginPath();
-          ctx.moveTo(-22, 0);
-          ctx.lineTo(pullX, pullY);
-          ctx.lineTo(22, 0);
+          ctx.moveTo(-24, 0);
+          ctx.lineTo(rx, ry);
           ctx.stroke();
 
-          // Grip Center
-          ctx.fillStyle = '#ffffff';
+          // Slingshot elastic band right to Arya
+          ctx.strokeStyle = 'rgba(255, 0, 127, 0.85)';
+          ctx.lineWidth = 3.5;
           ctx.beginPath();
-          ctx.arc(pullX, pullY, 8, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(24, 0);
+          ctx.lineTo(ax, ay);
+          ctx.stroke();
+
+          // Grip energy knot connecting the pair
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(ax, ay);
+          ctx.stroke();
         } else {
           // Direct aim indicator arrow
-          const arrowLen = 28;
+          const arrowLen = 32;
           const tipX = aim.normX * arrowLen;
           const tipY = aim.normY * arrowLen;
 
@@ -2135,21 +2169,35 @@
   function getAimVector() {
     if (!drag.active) return null;
 
-    const dx = drag.currentX - drag.anchorX;
-    const dy = drag.currentY - drag.anchorY;
-    const dist = Math.hypot(dx, dy);
+    // Determine pull vector based on where the player started:
+    // If started on or near the launcher pad (within 130px), drag directly from anchor
+    const distFromAnchor = Math.hypot(drag.startX - drag.anchorX, drag.startY - drag.anchorY);
+    const isDirectAnchorGrab = distFromAnchor < 130;
 
-    if (dist < 10) return null; // Deadzone to avoid accidental taps
-
-    let vx, vy;
-    if (dy > 0) {
-      // Slingshot mode: pulling down launches forward/upward
-      vx = -dx;
-      vy = -dy;
+    let pullX, pullY;
+    if (isDirectAnchorGrab) {
+      pullX = drag.currentX - drag.anchorX;
+      pullY = drag.currentY - drag.anchorY;
     } else {
-      // Direct aim mode: dragging/pointing upward aims directly at target
-      vx = dx;
-      vy = dy;
+      pullX = drag.currentX - drag.startX;
+      pullY = drag.currentY - drag.startY;
+    }
+
+    const dist = Math.hypot(pullX, pullY);
+    if (dist < 8) return null; // Small deadzone to prevent accidental micro-jitter taps
+
+    // Slingshot: pulling downward launches upward/forward into arena
+    // Direct Aim: pointing upward aims directly toward target
+    let vx, vy;
+    let mode = 'slingshot';
+    if (pullY >= 0) {
+      mode = 'slingshot';
+      vx = -pullX;
+      vy = -pullY;
+    } else {
+      mode = 'direct';
+      vx = pullX;
+      vy = pullY;
     }
 
     const aimDist = Math.hypot(vx, vy);
@@ -2164,6 +2212,21 @@
       normX = (normX >= 0 ? 1 : -1) * Math.sqrt(Math.max(0, 1 - normY * normY));
     }
 
+    // Visual pull clamp for physical orbs and elastic bands
+    const MAX_PULL = 90;
+    let visualPullX = pullX;
+    let visualPullY = pullY;
+    if (mode === 'slingshot') {
+      const pLen = Math.hypot(pullX, pullY);
+      if (pLen > MAX_PULL) {
+        visualPullX = (pullX / pLen) * MAX_PULL;
+        visualPullY = (pullY / pLen) * MAX_PULL;
+      }
+    } else {
+      visualPullX = 0;
+      visualPullY = 0;
+    }
+
     const LAUNCH_SPEED = 13.5;
     return {
       vx: normX * LAUNCH_SPEED,
@@ -2171,14 +2234,17 @@
       normX,
       normY,
       dist,
-      mode: dy > 0 ? 'slingshot' : 'direct'
+      mode,
+      pullX,
+      pullY,
+      visualPullX,
+      visualPullY
     };
   }
 
   function onPointerDown(e) {
     if (state.gameState !== 'AIMING') return;
 
-    // Prevent default gesture delays / scrolling
     if (e.cancelable) e.preventDefault();
 
     const coords = getCanvasCoords(e);
@@ -2218,11 +2284,15 @@
       } catch (_) {}
     }
 
+    const aim = getAimVector();
     drag.active = false;
+
+    // Reset resting positions for orbs
+    if (orbs[0]) { orbs[0].x = drag.anchorX - 18; orbs[0].y = drag.anchorY; }
+    if (orbs[1]) { orbs[1].x = drag.anchorX + 18; orbs[1].y = drag.anchorY; }
 
     if (state.gameState !== 'AIMING') return;
 
-    const aim = getAimVector();
     if (aim) {
       fireTwinSpirits(aim.vx, aim.vy);
     }
@@ -2236,21 +2306,35 @@
         } catch (_) {}
       }
       drag.active = false;
+      if (orbs[0]) { orbs[0].x = drag.anchorX - 18; orbs[0].y = drag.anchorY; }
+      if (orbs[1]) { orbs[1].x = drag.anchorX + 18; orbs[1].y = drag.anchorY; }
     }
   }
 
   // --- UI & Modal Event Bindings ---
   function setupUI() {
-    // Modern Pointer Events with Pointer Capture
+    // Modern Pointer Events on canvas and wrapper
     canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
     canvasWrapper.addEventListener('pointerdown', onPointerDown, { passive: false });
-    canvas.addEventListener('pointermove', onPointerMove, { passive: false });
-    canvas.addEventListener('pointerup', onPointerUp, { passive: false });
-    canvas.addEventListener('pointercancel', onPointerCancel, { passive: false });
 
-    // Safety fallback listeners on window
+    // Global window tracking so fast drags outside canvas never drop
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
     window.addEventListener('pointerup', onPointerUp, { passive: false });
     window.addEventListener('pointercancel', onPointerCancel, { passive: false });
+
+    // Standard Mouse Events fallback for rock-solid desktop pair-programming / browser testing
+    canvas.addEventListener('mousedown', onPointerDown);
+    canvasWrapper.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', (e) => {
+      if (drag.active && state.gameState === 'AIMING') {
+        onPointerMove(e);
+      }
+    });
+    window.addEventListener('mouseup', (e) => {
+      if (drag.active) {
+        onPointerUp(e);
+      }
+    });
 
     // Buttons
     document.getElementById('btn-play-game').onclick = () => {
