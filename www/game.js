@@ -91,6 +91,9 @@
   let particles = [];
   let floatingTexts = [];
   let shockwaves = [];
+  let gravityWells = [];
+  let switches = [];
+  let laserGates = [];
 
   // Drag / Slinging State
   const drag = {
@@ -103,10 +106,13 @@
     anchorY: CANVAS_LOGICAL_HEIGHT - 125
   };
 
-  // Screen Shake (Trauma)
+  // Screen Shake (Trauma) & Dynamic Hit Flash
   let screenTrauma = 0;
   let shakeOffsetX = 0;
   let shakeOffsetY = 0;
+  let shakeAngle = 0;
+  let hitFlash = 0;
+  let flashColor = '#ffffff';
 
   // DOM Elements
   const canvas = document.getElementById('game-canvas');
@@ -249,6 +255,11 @@
     screenTrauma = Math.min(1.0, screenTrauma + amount);
   }
 
+  function triggerHitFlash(amount = 0.35, color = '#ffffff') {
+    hitFlash = Math.min(1.0, hitFlash + amount);
+    flashColor = color;
+  }
+
   function triggerHaptic(type = 'light') {
     if (!state.settings.haptics) return;
     try {
@@ -269,18 +280,51 @@
   function createParticleBurst(x, y, colorCode, count = 22) {
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 1.5 + Math.random() * 5.5;
-      particles.push({
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        color: colorCode,
-        radius: 2 + Math.random() * 3.5,
-        alpha: 1,
-        life: 0.85 + Math.random() * 0.35,
-        decay: 0.025 + Math.random() * 0.02
-      });
+      const speed = 1.8 + Math.random() * 6.5;
+      const roll = Math.random();
+
+      if (roll < 0.35) {
+        // High-speed kinetic spark streak
+        particles.push({
+          type: 'spark',
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * (speed * 1.4),
+          vy: Math.sin(angle) * (speed * 1.4),
+          color: '#ffffff',
+          streakColor: colorCode,
+          alpha: 1.0,
+          decay: 0.035 + Math.random() * 0.02
+        });
+      } else if (roll < 0.70) {
+        // Faceted crystal glass shard
+        particles.push({
+          type: 'shard',
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          rot: Math.random() * Math.PI * 2,
+          vRot: (Math.random() - 0.5) * 12,
+          size: 3 + Math.random() * 5,
+          color: colorCode,
+          alpha: 1.0,
+          decay: 0.02 + Math.random() * 0.018
+        });
+      } else {
+        // Glowing neon energy ember
+        particles.push({
+          type: 'ember',
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * (speed * 0.8),
+          vy: Math.sin(angle) * (speed * 0.8),
+          color: colorCode,
+          radius: 2 + Math.random() * 3.5,
+          alpha: 1.0,
+          decay: 0.025 + Math.random() * 0.02
+        });
+      }
     }
 
     // Add luminous shockwave ring
@@ -288,8 +332,8 @@
       x: x,
       y: y,
       radius: 6,
-      maxRadius: 45,
-      alpha: 0.8,
+      maxRadius: 48,
+      alpha: 0.85,
       color: colorCode
     });
   }
@@ -327,6 +371,9 @@
     particles = [];
     floatingTexts = [];
     shockwaves = [];
+    gravityWells = [];
+    switches = [];
+    laserGates = [];
 
     // Populate level entities
     state.levelData.elements.forEach(item => {
@@ -338,7 +385,10 @@
           color: item.color,
           hp: item.hp,
           maxHp: item.hp,
-          pulse: Math.random() * Math.PI
+          subType: item.subType || 'normal', // 'normal' or 'bomb'
+          hasShield: item.hasShield || false,
+          pulse: Math.random() * Math.PI,
+          shieldRot: 0
         });
       } else if (item.type === 'wall') {
         walls.push({
@@ -374,6 +424,34 @@
           color: item.color,
           pairId: item.pairId,
           rot: 0
+        });
+      } else if (item.type === 'gravity') {
+        gravityWells.push({
+          x: item.x * CANVAS_LOGICAL_WIDTH,
+          y: item.y * CANVAS_LOGICAL_HEIGHT,
+          radius: item.radius || 32,
+          strength: item.strength || 2.2,
+          mode: item.mode || 'pull', // 'pull' or 'push'
+          rot: 0
+        });
+      } else if (item.type === 'switch') {
+        switches.push({
+          x: item.x * CANVAS_LOGICAL_WIDTH,
+          y: item.y * CANVAS_LOGICAL_HEIGHT,
+          radius: item.radius || 18,
+          gateId: item.gateId,
+          activated: false,
+          color: item.color || '#00f3ff'
+        });
+      } else if (item.type === 'gate') {
+        laserGates.push({
+          id: item.id,
+          x1: item.x1 * CANVAS_LOGICAL_WIDTH,
+          y1: item.y1 * CANVAS_LOGICAL_HEIGHT,
+          x2: item.x2 * CANVAS_LOGICAL_WIDTH,
+          y2: item.y2 * CANVAS_LOGICAL_HEIGHT,
+          active: true,
+          color: item.color || '#ff0055'
         });
       }
     });
@@ -579,17 +657,13 @@
 
       const speed = Math.hypot(orb.vx, orb.vy);
 
-      // Trailing Particles
-      if (Math.random() < 0.6) {
-        orb.trail.push({
-          x: orb.x,
-          y: orb.y,
-          color: COLORS[orb.colorType].main,
-          alpha: 0.65,
-          radius: orb.radius * 0.75
-        });
-      }
-      if (orb.trail.length > 12) orb.trail.shift();
+      // Trailing Fluid Ribbon Points
+      orb.trail.push({
+        x: orb.x,
+        y: orb.y,
+        color: COLORS[orb.colorType] ? COLORS[orb.colorType].main : '#00f3ff'
+      });
+      if (orb.trail.length > 18) orb.trail.shift();
 
       // Wall Boundary Collisions (Screen Edges)
       const padding = 14;
@@ -639,6 +713,7 @@
             window.soundEngine.playHarmonicHit(state.currentCombo, 'prism');
             addFloatingText('SYNERGY!', prism.x, prism.y - 20, COLORS.gold.main);
             addTrauma(0.2);
+            triggerHitFlash(0.3, COLORS.gold.main);
             triggerHaptic('medium');
 
             // Speed booster kick
@@ -664,6 +739,7 @@
             if (window.soundEngine.playPortalWarp) window.soundEngine.playPortalWarp();
             triggerHaptic('medium');
             addTrauma(0.2);
+            triggerHitFlash(0.25, portal.color);
             addFloatingText('WARP!', orb.x, orb.y - 20, portal.color);
 
             state.savedProgress.stats.portalsUsed = (state.savedProgress.stats.portalsUsed || 0) + 1;
@@ -675,6 +751,67 @@
           }
         }
       }
+
+      // Gravity Wells Attraction / Repulsion Force
+      gravityWells.forEach(well => {
+        well.rot += 0.035;
+        const gdx = well.x - orb.x;
+        const gdy = well.y - orb.y;
+        const gdist = Math.hypot(gdx, gdy);
+        const effectRadius = well.radius * 3.8;
+
+        if (gdist < effectRadius && gdist > 8) {
+          const force = (1 - gdist / effectRadius) * well.strength * 0.28;
+          const dir = well.mode === 'pull' ? 1 : -1;
+          orb.vx += (gdx / gdist) * force * dir;
+          orb.vy += (gdy / gdist) * force * dir;
+        }
+      });
+
+      // Neon Switches Activation
+      switches.forEach(sw => {
+        if (sw.activated) return;
+        const swDist = Math.hypot(orb.x - sw.x, orb.y - sw.y);
+        if (swDist < orb.radius + sw.radius) {
+          sw.activated = true;
+          laserGates.forEach(g => {
+            if (g.id === sw.gateId) g.active = false;
+          });
+          createParticleBurst(sw.x, sw.y, '#06d6a0', 22);
+          shockwaves.push({
+            x: sw.x,
+            y: sw.y,
+            radius: 8,
+            maxRadius: 75,
+            color: '#06d6a0',
+            alpha: 1.0
+          });
+          addFloatingText('🔓 GATE OPENED!', sw.x, sw.y - 20, '#06d6a0');
+          if (window.soundEngine.playSwitchHit) window.soundEngine.playSwitchHit();
+          triggerHaptic('heavy');
+          addTrauma(0.2);
+          triggerHitFlash(0.3, '#06d6a0');
+        }
+      });
+
+      // Laser Gates Barrier Reflection
+      laserGates.forEach(gate => {
+        if (!gate.active) return;
+        const dGate = distToSegment(orb.x, orb.y, gate.x1, gate.y1, gate.x2, gate.y2);
+        if (dGate < orb.radius + 5) {
+          const gx = gate.x2 - gate.x1;
+          const gy = gate.y2 - gate.y1;
+          const glen = Math.hypot(gx, gy) || 1;
+          const nx = -gy / glen;
+          const ny = gx / glen;
+          const dot = orb.vx * nx + orb.vy * ny;
+          orb.vx -= 1.9 * dot * nx;
+          orb.vy -= 1.9 * dot * ny;
+          createParticleBurst(orb.x, orb.y, gate.color, 12);
+          onOrbBounce(orb);
+          addFloatingText('⚡ BLOCKED!', orb.x, orb.y - 15, gate.color);
+        }
+      });
 
       // Collisions with Crystals
       for (let i = crystals.length - 1; i >= 0; i--) {
@@ -786,6 +923,26 @@
   }
 
   function damageCrystal(crystal, index, orb) {
+    // Energy Shield Absorbs Hit
+    if (crystal.hasShield) {
+      crystal.hasShield = false;
+      createParticleBurst(crystal.x, crystal.y, '#00f3ff', 24);
+      shockwaves.push({
+        x: crystal.x,
+        y: crystal.y,
+        radius: 6,
+        maxRadius: 50,
+        color: '#00f3ff',
+        alpha: 0.95
+      });
+      addFloatingText('🛡️ SHIELD BROKEN!', crystal.x, crystal.y - 22, '#00f3ff');
+      if (window.soundEngine.playShieldBreak) window.soundEngine.playShieldBreak();
+      triggerHaptic('heavy');
+      addTrauma(0.18);
+      triggerHitFlash(0.35, '#00f3ff');
+      return;
+    }
+
     crystal.hp--;
     state.currentCombo++;
     if (state.currentCombo > state.maxCombo) {
@@ -796,6 +953,7 @@
     window.soundEngine.playHarmonicHit(state.currentCombo);
     triggerHaptic('heavy');
     addTrauma(0.22);
+    triggerHitFlash(0.18, COLORS[crystal.color] ? COLORS[crystal.color].main : '#ffffff');
 
     // Roya Piercing Power (Cyan)
     if (orb && orb.id === 'roya') {
@@ -857,6 +1015,7 @@
       state.timeScale = 1.0;
       state.slowMoTimer = 0;
       addTrauma(0.5);
+      triggerHitFlash(0.85, '#ffb703');
       createParticleBurst(crystal.x, crystal.y, '#ffffff', 45);
       createParticleBurst(crystal.x, crystal.y, COLORS.gold.main, 35);
       shockwaves.push({
@@ -880,6 +1039,35 @@
     }
 
     if (crystal.hp <= 0) {
+      // Volatile Bomb Chain Reaction Blast
+      if (crystal.subType === 'bomb') {
+        addTrauma(0.38);
+        triggerHitFlash(0.65, '#ff7700');
+        shockwaves.push({
+          x: crystal.x,
+          y: crystal.y,
+          radius: 10,
+          maxRadius: 110,
+          color: '#ff7700',
+          alpha: 1.0
+        });
+        createParticleBurst(crystal.x, crystal.y, '#ff7700', 35);
+        createParticleBurst(crystal.x, crystal.y, '#ffb703', 25);
+        addFloatingText('💣 BOOM!', crystal.x, crystal.y - 28, '#ff7700');
+        if (window.soundEngine.playBombExplode) window.soundEngine.playBombExplode();
+
+        // Damage all nearby crystals within 110px
+        for (let c = crystals.length - 1; c >= 0; c--) {
+          const other = crystals[c];
+          if (other !== crystal) {
+            const bd = Math.hypot(other.x - crystal.x, other.y - crystal.y);
+            if (bd < 110) {
+              damageCrystal(other, c, { id: 'bomb', colorType: 'synergy' });
+            }
+          }
+        }
+      }
+
       createParticleBurst(crystal.x, crystal.y, COLORS[crystal.color].main, 28);
       addFloatingText(`+${pts}`, crystal.x, crystal.y - 20, COLORS[crystal.color].main);
       // Award +2 Gems for every shattered crystal
@@ -1043,23 +1231,37 @@
 
     // Apply Screen Shake (Trauma Decay)
     if (screenTrauma > 0) {
-      shakeOffsetX = (Math.random() * 2 - 1) * screenTrauma * screenTrauma * 16;
-      shakeOffsetY = (Math.random() * 2 - 1) * screenTrauma * screenTrauma * 16;
+      const traumaSq = screenTrauma * screenTrauma;
+      shakeOffsetX = (Math.random() * 2 - 1) * traumaSq * 18;
+      shakeOffsetY = (Math.random() * 2 - 1) * traumaSq * 18;
+      shakeAngle = (Math.random() * 2 - 1) * traumaSq * 0.032;
       screenTrauma = Math.max(0, screenTrauma - 0.035);
     } else {
       shakeOffsetX = 0;
       shakeOffsetY = 0;
+      shakeAngle = 0;
     }
 
     // Set up hardware-accelerated scaled & centered game viewport
     const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     ctx.save();
     ctx.scale(dpr, dpr);
-    ctx.translate(offsetX + shakeOffsetX, offsetY + shakeOffsetY);
+    
+    // Centered camera shake with rotational torque
+    const cx = offsetX + (CANVAS_LOGICAL_WIDTH * scale) / 2;
+    const cy = offsetY + (CANVAS_LOGICAL_HEIGHT * scale) / 2;
+    ctx.translate(cx + shakeOffsetX, cy + shakeOffsetY);
+    if (shakeAngle !== 0) ctx.rotate(shakeAngle);
+    ctx.translate(-cx, -cy);
+
+    ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
 
     // Draw Level Entities
     drawWalls();
+    drawLaserGates();
+    drawSwitches();
+    drawGravityWells();
     drawSpinners();
     drawPrisms();
     drawPortals();
@@ -1081,6 +1283,32 @@
 
     // Draw Launcher Base Pad
     drawLauncherPad();
+
+    // Post-Processing: Hit Flash & Chromatic Edge Vignette
+    if (hitFlash > 0.015) {
+      ctx.save();
+      // Luminous ambient flash
+      ctx.fillStyle = flashColor;
+      ctx.globalAlpha = Math.min(0.4, hitFlash * 0.32);
+      ctx.fillRect(0, 0, CANVAS_LOGICAL_WIDTH, CANVAS_LOGICAL_HEIGHT);
+
+      // Cyan left chromatic fringe
+      const gradLeft = ctx.createLinearGradient(0, 0, 70, 0);
+      gradLeft.addColorStop(0, `rgba(0, 243, 255, ${hitFlash * 0.45})`);
+      gradLeft.addColorStop(1, 'rgba(0, 243, 255, 0)');
+      ctx.fillStyle = gradLeft;
+      ctx.fillRect(0, 0, 70, CANVAS_LOGICAL_HEIGHT);
+
+      // Magenta right chromatic fringe
+      const gradRight = ctx.createLinearGradient(CANVAS_LOGICAL_WIDTH - 70, 0, CANVAS_LOGICAL_WIDTH, 0);
+      gradRight.addColorStop(0, 'rgba(255, 0, 127, 0)');
+      gradRight.addColorStop(1, `rgba(255, 0, 127, ${hitFlash * 0.45})`);
+      ctx.fillStyle = gradRight;
+      ctx.fillRect(CANVAS_LOGICAL_WIDTH - 70, 0, 70, CANVAS_LOGICAL_HEIGHT);
+
+      ctx.restore();
+      hitFlash = Math.max(0, hitFlash * 0.86 - 0.015);
+    }
 
     ctx.restore();
   }
@@ -1253,15 +1481,30 @@
       ctx.translate(c.x, c.y);
       ctx.scale(pulseScale, pulseScale);
 
+      // Energy Shield Shimmering Ring
+      if (c.hasShield) {
+        c.shieldRot = (c.shieldRot || 0) + 0.035;
+        ctx.save();
+        ctx.rotate(c.shieldRot);
+        ctx.strokeStyle = '#00f3ff';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.arc(0, 0, c.radius + 9, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+
       // Outer Glowing Ring
-      ctx.fillStyle = colorDef.glow;
+      ctx.fillStyle = c.subType === 'bomb' ? 'rgba(255, 119, 0, 0.45)' : colorDef.glow;
       ctx.beginPath();
       ctx.arc(0, 0, c.radius + 5, 0, Math.PI * 2);
       ctx.fill();
 
       // Faceted Hexagon Crystal
-      ctx.fillStyle = colorDef.main;
-      ctx.strokeStyle = '#fff';
+      ctx.fillStyle = c.subType === 'bomb' ? '#ff7700' : colorDef.main;
+      ctx.strokeStyle = c.subType === 'bomb' ? '#ffb703' : '#fff';
       ctx.lineWidth = 2.5;
 
       ctx.beginPath();
@@ -1276,14 +1519,138 @@
       ctx.fill();
       ctx.stroke();
 
-      // Multi-hit health badge
-      if (c.maxHp > 1) {
+      // Bomb icon indicator
+      if (c.subType === 'bomb') {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💣', 0, 0);
+      } else if (c.maxHp > 1) {
+        // Multi-hit health badge
         ctx.fillStyle = '#fff';
         ctx.font = 'bold 12px Outfit, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(c.hp, 0, 0);
       }
+
+      ctx.restore();
+    });
+  }
+
+  function drawLaserGates() {
+    laserGates.forEach(gate => {
+      if (!gate.active) return;
+      ctx.save();
+
+      // Emitter Pylons at both ends
+      [ {x: gate.x1, y: gate.y1}, {x: gate.x2, y: gate.y2} ].forEach(p => {
+        ctx.fillStyle = gate.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      // Outer Pulsing Laser Beam
+      ctx.strokeStyle = 'rgba(255, 0, 85, 0.45)';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(gate.x1, gate.y1);
+      ctx.lineTo(gate.x2, gate.y2);
+      ctx.stroke();
+
+      // Inner Laser Core
+      ctx.strokeStyle = gate.color;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(gate.x1, gate.y1);
+      ctx.lineTo(gate.x2, gate.y2);
+      ctx.stroke();
+
+      // Hot White Core Line
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(gate.x1, gate.y1);
+      ctx.lineTo(gate.x2, gate.y2);
+      ctx.stroke();
+
+      ctx.restore();
+    });
+  }
+
+  function drawSwitches() {
+    switches.forEach(sw => {
+      ctx.save();
+      ctx.translate(sw.x, sw.y);
+
+      // Terminal Base Ring
+      ctx.strokeStyle = sw.activated ? '#06d6a0' : sw.color;
+      ctx.lineWidth = 2.5;
+      ctx.fillStyle = sw.activated ? 'rgba(6, 214, 160, 0.2)' : 'rgba(0, 243, 255, 0.15)';
+      ctx.beginPath();
+      ctx.arc(0, 0, sw.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Status Icon
+      ctx.fillStyle = sw.activated ? '#06d6a0' : '#ffffff';
+      ctx.font = 'bold 11px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(sw.activated ? '✓' : '⚡', 0, 0);
+
+      ctx.restore();
+    });
+  }
+
+  function drawGravityWells() {
+    gravityWells.forEach(well => {
+      well.rot += 0.04;
+      const isPull = well.mode === 'pull';
+      const color = isPull ? '#b537f2' : '#00f3ff';
+
+      ctx.save();
+      ctx.translate(well.x, well.y);
+
+      // Outer Gravitational Field Horizon
+      ctx.strokeStyle = isPull ? 'rgba(181, 55, 242, 0.25)' : 'rgba(0, 243, 255, 0.25)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.arc(0, 0, well.radius * 2.8, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Swirling Galaxy Vortex Arms
+      ctx.rotate(well.rot);
+      for (let arm = 0; arm < 3; arm++) {
+        ctx.rotate((Math.PI * 2) / 3);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(well.radius * 0.6, 0, well.radius * 0.7, 0, Math.PI);
+        ctx.stroke();
+      }
+
+      // Singularity Core (Black or White Hole)
+      ctx.fillStyle = isPull ? '#0d0417' : '#ffffff';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Core Symbol
+      ctx.fillStyle = isPull ? '#b537f2' : '#060a17';
+      ctx.font = 'bold 9px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(isPull ? '▼' : '▲', 0, 0);
 
       ctx.restore();
     });
@@ -1304,19 +1671,36 @@
     }
 
     orbs.forEach(orb => {
-      // Draw Motion Trails (Fast batch render without per-particle save/restore)
+      // Draw Continuous Luminous Fluid Comet Trail
       const trailLen = orb.trail.length;
-      if (trailLen > 0) {
-        for (let i = 0; i < trailLen; i++) {
-          const t = orb.trail[i];
+      if (trailLen > 1) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        for (let i = 0; i < trailLen - 1; i++) {
+          const t1 = orb.trail[i];
+          const t2 = orb.trail[i + 1];
           const progress = (i + 1) / trailLen;
-          ctx.fillStyle = t.color;
-          ctx.globalAlpha = progress * 0.38;
+
+          // Outer glowing chromatic ribbon
+          ctx.strokeStyle = t1.color;
+          ctx.lineWidth = Math.max(2, orb.radius * 1.5 * progress);
+          ctx.globalAlpha = progress * 0.45;
           ctx.beginPath();
-          ctx.arc(t.x, t.y, Math.max(1, t.radius * progress), 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(t1.x, t1.y);
+          ctx.lineTo(t2.x, t2.y);
+          ctx.stroke();
+
+          // Hot luminous core ribbon
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = Math.max(1, orb.radius * 0.55 * progress);
+          ctx.globalAlpha = progress * 0.75;
+          ctx.beginPath();
+          ctx.moveTo(t1.x, t1.y);
+          ctx.lineTo(t2.x, t2.y);
+          ctx.stroke();
         }
-        ctx.globalAlpha = 1.0;
+        ctx.restore();
       }
 
       // Draw Main Orb (Hardware-accelerated concentric arcs)
@@ -1434,6 +1818,20 @@
     for (let s = 0; s < maxSteps; s++) {
       simX += simVx;
       simY += simVy;
+
+      // Apply gravity well curvature to trajectory ray
+      gravityWells.forEach(well => {
+        const gdx = well.x - simX;
+        const gdy = well.y - simY;
+        const gdist = Math.hypot(gdx, gdy);
+        const effectRadius = well.radius * 3.8;
+        if (gdist < effectRadius && gdist > 8) {
+          const force = (1 - gdist / effectRadius) * well.strength * 0.28;
+          const dir = well.mode === 'pull' ? 1 : -1;
+          simVx += (gdx / gdist) * force * dir;
+          simVy += (gdy / gdist) * force * dir;
+        }
+      });
 
       // Check collision with crystals along simulated ray
       if (!targetedCrystal) {
@@ -1575,6 +1973,8 @@
       const p = particles[i];
       p.x += p.vx;
       p.y += p.vy;
+      p.vx *= 0.96;
+      p.vy *= 0.96;
       p.alpha -= p.decay;
 
       if (p.alpha <= 0) {
@@ -1582,13 +1982,47 @@
         continue;
       }
 
-      ctx.fillStyle = p.color;
+      ctx.save();
       ctx.globalAlpha = Math.max(0, p.alpha);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fill();
+
+      if (p.type === 'shard') {
+        p.rot += p.vRot * 0.04;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        // Sharp triangular shard with white edge glint
+        ctx.moveTo(0, -p.size);
+        ctx.lineTo(p.size * 0.65, p.size * 0.75);
+        ctx.lineTo(-p.size * 0.65, p.size * 0.75);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (p.type === 'spark') {
+        ctx.strokeStyle = p.streakColor || '#ffffff';
+        ctx.lineWidth = 2.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - p.vx * 1.8, p.y - p.vy * 1.8);
+        ctx.stroke();
+        // Hot white head
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Glowing circular ember
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
     }
-    ctx.globalAlpha = 1.0;
   }
 
   function drawShockwaves() {
