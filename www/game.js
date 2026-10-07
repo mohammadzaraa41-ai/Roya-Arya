@@ -2453,9 +2453,9 @@
       btnClaimAdGems.onclick = () => {
         showRewardedAd(() => {
           addGems(100, true);
-          btnClaimAdGems.innerHTML = '<span>تم الاستلام! ✓</span>';
+          btnClaimAdGems.innerHTML = '<span class="gift-icon">✨</span><span class="gift-val">+100 💎</span>';
           setTimeout(() => {
-            btnClaimAdGems.innerHTML = '<span>مكافأة 🎬</span>';
+            btnClaimAdGems.innerHTML = '<span class="gift-icon">🎁</span><span class="gift-val">+100 💎</span>';
           }, 3500);
         }, 'جاري تحميل مكافأة الأطياف السريعة...');
       };
