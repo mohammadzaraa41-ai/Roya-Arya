@@ -13,3 +13,11 @@ DerivedData/
 .DS_Store
 Thumbs.db
 *.log
+
+# Android build artifacts
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.apk
+

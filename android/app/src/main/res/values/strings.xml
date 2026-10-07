@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Roya &amp; Arya</string>
+    <string name="title_activity_main">Roya &amp; Arya</string>
+    <string name="package_name">com.royaarya.neonricochet</string>
+    <string name="custom_url_scheme">com.royaarya.neonricochet</string>
+</resources>
