@@ -37,7 +37,7 @@
       btn_play: 'ابدأ اللعب الآن',
       btn_levels: 'المراحل',
       btn_skins: 'الأطياف',
-      btn_achievements: 'الأوسمة والإنجازات',
+      btn_achievements: 'الأوسمة',
       daily_reward_tag: 'مكافأة الأطياف السريعة',
       daily_reward_title: 'شاهد إعلاناً واحصل على <strong>+100 💎 جوهرة</strong> مجاناً!',
       btn_claim_reward: 'مكافأة 🎬',

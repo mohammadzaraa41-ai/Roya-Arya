@@ -80,90 +80,103 @@
     <!-- Start / Title Screen -->
     <div id="screen-title" class="modal-overlay">
       <div class="modal-card title-card">
+        <!-- Top Navigation Bar -->
         <div class="title-top-bar">
-          <button id="btn-toggle-lang" class="btn-lang-toggle" aria-label="Toggle Language" title="تغيير اللغة / Switch Language">
+          <button id="btn-toggle-lang" class="btn-top-glass" aria-label="Toggle Language" title="تغيير اللغة / Switch Language">
             <span class="lang-icon">🌐</span>
             <span class="btn-lang-toggle-text">English 🌐</span>
           </button>
-        </div>
 
-        <div class="title-glow-aura"></div>
-        <div class="title-duo-avatars">
-          <div class="avatar-spirit avatar-roya">
-            <div class="spirit-inner-core"></div>
-            <span class="spirit-name">Roya</span>
-            <span class="spirit-role" data-i18n="spirit_roya_role">طيف رويا الأزرق</span>
-          </div>
-          <div class="avatar-synergy-pulse">⚡</div>
-          <div class="avatar-spirit avatar-arya">
-            <div class="spirit-inner-core"></div>
-            <span class="spirit-name">Arya</span>
-            <span class="spirit-role" data-i18n="spirit_arya_role">طيف الطاقة الوردي</span>
-          </div>
-        </div>
-
-        <h1 class="game-logo">ROYA <span class="amp">&</span> ARYA</h1>
-        <p class="game-tagline" data-i18n="game_tagline">Neon Ricochet & Harmonic Spirits</p>
-
-        <p class="game-intro-desc" data-i18n="game_intro_desc">
-          وجّه الروحين التوأم عبر المنشورات والبوابات النيونية لتفتيت بلورات الظلام بأقل عدد من الارتدادات!
-        </p>
-
-        <!-- Daily Rewarded Ad Reward Box -->
-        <div class="daily-reward-card" id="card-daily-reward">
-          <div class="reward-icon-sparkle">🎁</div>
-          <div class="reward-text-col">
-            <span class="reward-tag" data-i18n="daily_reward_tag">مكافأة الأطياف السريعة</span>
-            <span class="reward-title" data-i18n="daily_reward_title">شاهد إعلاناً واحصل على <strong>+100 💎 جوهرة</strong> مجاناً!</span>
-          </div>
-          <button id="btn-claim-ad-gems" class="btn-reward-pill">
-            <span data-i18n="btn_claim_reward">مكافأة 🎬</span>
+          <!-- Discreet Floating Free Reward Gift Button -->
+          <button id="btn-claim-ad-gems" class="btn-top-gift" title="مكافأة يومية مجانية / Free Gift">
+            <span class="gift-icon">🎁</span>
+            <span class="gift-val">+100 💎</span>
           </button>
         </div>
 
-        <!-- Mode Switcher -->
-        <div class="mode-tabs">
-          <button id="tab-mode-campaign" class="tab-btn active" data-i18n="tab_campaign">حملة العوالم (30 مرحلة)</button>
-          <button id="tab-mode-endless" class="tab-btn" data-i18n="tab_endless">النمط اللانهائي السريع 🔥</button>
+        <!-- Ambient Nebula Background Glow -->
+        <div class="title-glow-aura"></div>
+
+        <!-- Hero Ethereal Duo Showcase -->
+        <div class="title-hero-showcase">
+          <div class="hero-spirits-stage">
+            <div class="avatar-spirit avatar-roya">
+              <div class="spirit-inner-core"></div>
+              <span class="spirit-name">ROYA</span>
+            </div>
+
+            <div class="hero-synergy-bridge">
+              <div class="synergy-beam-line"></div>
+              <div class="synergy-spark-orb">⚡</div>
+            </div>
+
+            <div class="avatar-spirit avatar-arya">
+              <div class="spirit-inner-core"></div>
+              <span class="spirit-name">ARYA</span>
+            </div>
+          </div>
+
+          <!-- Futuristic Neon Logo -->
+          <div class="hero-logo-box">
+            <h1 class="game-logo">ROYA <span class="amp">&</span> ARYA</h1>
+            <div class="logo-sub-pill">
+              <span class="pill-star">✦</span>
+              <span class="pill-txt" data-i18n="game_tagline">NEON RICOCHET</span>
+              <span class="pill-star">✦</span>
+            </div>
+          </div>
         </div>
 
+        <!-- Mode Selector Switcher -->
+        <div class="mode-tabs">
+          <button id="tab-mode-campaign" class="tab-btn active" data-i18n="tab_campaign">حملة العوالم</button>
+          <button id="tab-mode-endless" class="tab-btn" data-i18n="tab_endless">النمط اللانهائي 🔥</button>
+        </div>
+
+        <!-- Primary Play Action -->
         <div class="menu-actions">
-          <button id="btn-play-game" class="btn-primary pulse-btn">
-            <span data-i18n="btn_play">ابدأ اللعب الآن</span>
+          <button id="btn-play-game" class="btn-primary-hero pulse-btn">
+            <div class="btn-sheen-sweep"></div>
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
               <path d="M8 5v14l11-7z"/>
             </svg>
+            <span data-i18n="btn_play">ابدأ اللعب الآن</span>
           </button>
           
-          <div class="secondary-actions">
-            <button id="btn-open-levels" class="btn-secondary">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
-              </svg>
-              <span data-i18n="btn_levels">المراحل</span>
+          <!-- Triple Icon Dock Grid -->
+          <div class="main-dock-grid">
+            <button id="btn-open-levels" class="dock-btn" title="المراحل">
+              <div class="dock-icon-box">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+                </svg>
+              </div>
+              <span class="dock-txt" data-i18n="btn_levels">المراحل</span>
             </button>
-            <button id="btn-open-skins" class="btn-secondary">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.64 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
-              </svg>
-              <span data-i18n="btn_skins">الأطياف</span>
+
+            <button id="btn-open-skins" class="dock-btn" title="الأطياف">
+              <div class="dock-icon-box">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.64 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                </svg>
+              </div>
+              <span class="dock-txt" data-i18n="btn_skins">الأطياف</span>
+            </button>
+
+            <button id="btn-open-achievements" class="dock-btn" title="الأوسمة والإنجازات">
+              <div class="dock-icon-box">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1c1.8-.41 3.2-1.92 3.61-3.96C19.08 11.63 21 9.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
+                </svg>
+              </div>
+              <span class="dock-txt" data-i18n="btn_achievements">الأوسمة</span>
             </button>
           </div>
-
-          <button id="btn-open-achievements" class="btn-secondary" style="width:100%;">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1c1.8-.41 3.2-1.92 3.61-3.96C19.08 11.63 21 9.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
-            </svg>
-            <span data-i18n="btn_achievements">الأوسمة والإنجازات (Achievements)</span>
-          </button>
         </div>
 
-        <a href="privacy.html" class="privacy-link" target="_blank" data-i18n="privacy_policy">سياسة الخصوصية | Privacy Policy</a>
-
-        <div class="features-pill-row">
-          <span class="feat-pill" data-i18n="feat_one_finger">⚡ تحكم بإصبع واحد</span>
-          <span class="feat-pill" data-i18n="feat_audio">🎵 نغمات تفاعلية</span>
-          <span class="feat-pill" data-i18n="feat_offline">📱 Offline First</span>
+        <!-- Clean Subtle Footer -->
+        <div class="title-footer-row">
+          <a href="privacy.html" class="privacy-link" target="_blank" data-i18n="privacy_policy">سياسة الخصوصية | Privacy Policy</a>
         </div>
       </div>
     </div>
