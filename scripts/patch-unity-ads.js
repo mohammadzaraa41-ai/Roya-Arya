@@ -8,12 +8,13 @@ import UnityAds
 import UIKit
 
 @objc public class Unityads: NSObject {
-    private var isInitialized = false
+    var isInitialized = false
     private var testMode = false
     private var currentRewardedPlacementId: String?
     private var currentInterstitialPlacementId: String?
     var rewardedVideoLoaded = false
     var interstitialLoaded = false
+    private var initDelegate: InitializationDelegate?
     
     // Callback types
     typealias InitializationCallback = (Bool, String?) -> Void
@@ -43,15 +44,9 @@ import UIKit
         print("[UnityAds] Initializing with Game ID: \\(gameId)")
         
         self.testMode = testMode
+        self.initDelegate = InitializationDelegate(callback: callback, parent: self)
         
-        UnityAds.initialize(gameId, testMode: testMode) { [weak self] in
-            print("[UnityAds] Initialized successfully")
-            self?.isInitialized = true
-            callback(true, nil)
-        } errorHandler: { [weak self] error in
-            print("[UnityAds] Initialization failed: \\(error.localizedDescription)")
-            callback(false, error.localizedDescription)
-        }
+        UnityAds.initialize(gameId, testMode: testMode, initializationDelegate: self.initDelegate)
     }
     
     func loadRewardedVideo(placementId: String, callback: @escaping AdLoadCallback) {
@@ -142,6 +137,29 @@ import UIKit
     }
 }
 
+// MARK: - Initialization Delegate
+
+class InitializationDelegate: NSObject, UnityAdsInitializationDelegate {
+    private let callback: Unityads.InitializationCallback
+    private weak var parent: Unityads?
+    
+    init(callback: @escaping Unityads.InitializationCallback, parent: Unityads) {
+        self.callback = callback
+        self.parent = parent
+    }
+    
+    func initializationComplete() {
+        print("[UnityAds] Initialized successfully")
+        parent?.isInitialized = true
+        callback(true, nil)
+    }
+    
+    func initializationFailed(_ error: UnityAdsInitializationError, withMessage message: String) {
+        print("[UnityAds] Initialization failed: \\(message)")
+        callback(false, message)
+    }
+}
+
 // MARK: - Load Delegates
 
 class RewardedVideoLoadDelegate: NSObject, UnityAdsLoadDelegate {
@@ -207,7 +225,7 @@ class RewardedVideoShowDelegate: NSObject, UnityAdsShowDelegate {
         print("[UnityAds] Rewarded video clicked")
     }
     
-    func unityAdsShowComplete(_ placementId: String, withFinishState state: UnityAdsShowCompletionState) {
+    func unityAdsShowComplete(_ placementId: String, withFinish state: UnityAdsShowCompletionState) {
         print("[UnityAds] Rewarded video show completed with state: \\(state.rawValue)")
         
         parent?.rewardedVideoLoaded = false
@@ -245,7 +263,7 @@ class InterstitialShowDelegate: NSObject, UnityAdsShowDelegate {
         print("[UnityAds] Interstitial clicked")
     }
     
-    func unityAdsShowComplete(_ placementId: String, withFinishState state: UnityAdsShowCompletionState) {
+    func unityAdsShowComplete(_ placementId: String, withFinish state: UnityAdsShowCompletionState) {
         print("[UnityAds] Interstitial show completed")
         parent?.interstitialLoaded = false
     }
@@ -260,7 +278,7 @@ class InterstitialShowDelegate: NSObject, UnityAdsShowDelegate {
 
 if (fs.existsSync(target)) {
   fs.writeFileSync(target, patchedSwiftContent, 'utf8');
-  console.log('[Patch] Successfully wrote fully compatible Unityads.swift for Xcode 16 / Swift 6.');
+  console.log('[Patch] Successfully wrote fully compatible Unityads.swift for UnityAds 4.9.3 + Xcode 16.');
 } else {
   console.log('[Patch] Target Unityads.swift not found (skipping).');
 }
