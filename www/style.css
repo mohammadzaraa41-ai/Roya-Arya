@@ -1774,4 +1774,260 @@ input:checked + .slider:before {
   border-right: 3px solid var(--roya-cyan);
 }
 
+/* ========================================================
+   CINEMATIC INTRO SCENE & WELCOME ANIMATION
+   ======================================================== */
+.intro-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #080910;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.intro-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#intro-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.intro-ui-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.intro-logo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(18px) scale(0.88);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 35px rgba(0, 243, 255, 0.35));
+}
+
+.intro-logo-box.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.intro-emblem-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.intro-pulse-aura {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(181, 55, 242, 0.4) 0%, rgba(0, 243, 255, 0.15) 50%, transparent 75%);
+  animation: introAuraPulse 2s ease-in-out infinite alternate;
+}
+
+.intro-duo-halo {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 20px rgba(181, 55, 242, 0.5), inset 0 0 15px rgba(0, 243, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 6px;
+  background: rgba(14, 16, 28, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+.intro-orb-dot {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.intro-orb-dot.cyan {
+  color: var(--roya-cyan);
+  text-shadow: 0 0 12px var(--roya-cyan);
+  animation: introDotFloat 1.8s ease-in-out infinite alternate;
+}
+
+.intro-orb-dot.magenta {
+  color: var(--arya-magenta);
+  text-shadow: 0 0 12px var(--arya-magenta);
+  animation: introDotFloat 1.8s ease-in-out infinite alternate-reverse;
+}
+
+.intro-tether-line {
+  flex: 1;
+  height: 2px;
+  margin: 0 4px;
+  background: linear-gradient(90deg, var(--roya-cyan), var(--synergy-purple), var(--arya-magenta));
+  box-shadow: 0 0 8px rgba(181, 55, 242, 0.9);
+}
+
+.intro-brand-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #00f3ff 15%, #ffffff 50%, #ff007f 85%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
+  margin-bottom: 4px;
+}
+
+.intro-brand-sub {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: rgba(240, 244, 252, 0.85);
+  margin-bottom: 6px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.intro-brand-ar {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.btn-skip-intro {
+  position: absolute;
+  top: calc(var(--safe-top) + 16px);
+  left: 18px;
+  z-index: 10002;
+  pointer-events: auto;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(18, 20, 32, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  transition: all 0.25s ease;
+}
+
+[dir="rtl"] .btn-skip-intro {
+  left: auto;
+  right: 18px;
+}
+
+.btn-skip-intro:hover, .btn-skip-intro:active {
+  background: rgba(0, 243, 255, 0.2);
+  border-color: var(--roya-cyan);
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(0, 243, 255, 0.35);
+}
+
+.btn-skip-intro .skip-arr {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+@keyframes introAuraPulse {
+  0% { transform: scale(0.9); opacity: 0.4; }
+  100% { transform: scale(1.15); opacity: 0.85; }
+}
+
+@keyframes introDotFloat {
+  0% { transform: translateY(-2px); }
+  100% { transform: translateY(2px); }
+}
+
+/* ========================================================
+   COSMIC PLAYER RANK & RESONANCE FEVER JUICE
+   ======================================================== */
+.player-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(18, 20, 32, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  margin-top: 10px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.player-rank-badge:hover, .player-rank-badge:active {
+  transform: scale(1.04);
+  box-shadow: 0 0 16px rgba(0, 243, 255, 0.3);
+}
+
+.player-rank-badge .rank-icon {
+  font-size: 1.05rem;
+}
+
+.player-rank-badge .rank-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.player-rank-badge .rank-stars {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--prism-gold);
+  padding-inline-start: 4px;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* Resonance Fever Screen Glow */
+.resonance-fever-active #canvas-wrapper {
+  animation: feverPulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes feverPulse {
+  0% {
+    box-shadow: inset 0 0 35px rgba(181, 55, 242, 0.4), 0 0 25px rgba(0, 243, 255, 0.3);
+  }
+  100% {
+    box-shadow: inset 0 0 55px rgba(255, 0, 127, 0.6), 0 0 45px rgba(255, 183, 3, 0.4);
+  }
+}
+
+
+
 

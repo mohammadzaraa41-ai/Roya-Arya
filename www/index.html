@@ -77,6 +77,30 @@
     </main>
 
     <!-- Screens & Modals -->
+    <!-- Cinematic Intro Video / Animation Overlay -->
+    <div id="intro-cinematic" class="intro-overlay">
+      <canvas id="intro-canvas"></canvas>
+      <div class="intro-ui-layer">
+        <div class="intro-logo-box" id="intro-logo-box">
+          <div class="intro-emblem-wrap">
+            <div class="intro-pulse-aura"></div>
+            <div class="intro-duo-halo">
+              <span class="intro-orb-dot cyan">✦</span>
+              <span class="intro-tether-line"></span>
+              <span class="intro-orb-dot magenta">✺</span>
+            </div>
+          </div>
+          <h1 class="intro-brand-title">ROYA & ARYA</h1>
+          <p class="intro-brand-sub">NEON RICOCHET</p>
+          <span class="intro-brand-ar">أطياف النيون الكونية</span>
+        </div>
+      </div>
+      <button id="btn-skip-intro" class="btn-skip-intro" aria-label="Skip Intro" title="تخطي">
+        <span class="skip-lbl">تخطي</span>
+        <span class="skip-arr">⏭</span>
+      </button>
+    </div>
+
     <!-- Start / Title Screen -->
     <div id="screen-title" class="modal-overlay">
       <div class="modal-card title-card">
@@ -85,7 +109,7 @@
           <!-- Discreet Floating Free Reward Gift Button -->
           <button id="btn-claim-ad-gems" class="btn-top-gift" title="مكافأة يومية مجانية / Free Gift">
             <span class="gift-icon">🎁</span>
-            <span class="gift-val">+100 💎</span>
+            <span class="gift-val">+50 💎</span>
           </button>
         </div>
 
@@ -119,6 +143,13 @@
               <span class="pill-txt" data-i18n="game_tagline">NEON RICOCHET</span>
               <span class="pill-star">✦</span>
             </div>
+          </div>
+
+          <!-- Cosmic Player Rank Badge -->
+          <div id="player-rank-badge" class="player-rank-badge" title="رتبة اللاعب الكونية">
+            <span class="rank-icon" id="rank-icon">✨</span>
+            <span class="rank-title" id="rank-title">مبتدئ الأطياف</span>
+            <span class="rank-stars" id="rank-stars-count">⭐ 0/150</span>
           </div>
         </div>
 
@@ -405,6 +436,7 @@
   <script src="i18n.js"></script>
   <script src="audio.js"></script>
   <script src="levels.js"></script>
+  <script src="intro.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

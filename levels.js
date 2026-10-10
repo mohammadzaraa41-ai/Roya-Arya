@@ -11,9 +11,11 @@
  */
 
 const WORLDS = [
-  { id: 1, name_ar: "العالم 1: سديم النيون", name_en: "World 1: Neon Genesis", levels: [1, 10], color: "#00f3ff" },
-  { id: 2, name_ar: "العالم 2: بوابات الأثير", name_en: "World 2: Prisms & Portals", levels: [11, 20], color: "#b537f2" },
-  { id: 3, name_ar: "العالم 3: الفوضى الحركية", name_en: "World 3: Kinetic Chaos", levels: [21, 30], color: "#ff007f" },
+  { id: 1, name_ar: "العالم 1: سديم النيون", name_en: "World 1: Neon Genesis", levels: [1, 10], color: "#00f3ff", desc_ar: "أساسيات الزوايا والانعكاس الكوني", desc_en: "Geometric fundamentals & cosmic reflection" },
+  { id: 2, name_ar: "العالم 2: بوابات الأثير والمناشير", name_en: "World 2: Prisms & Portals", levels: [11, 20], color: "#b537f2", desc_ar: "انتقال آني وتحويل أطياف الضوء", desc_en: "Instant teleportation & prism synthesis" },
+  { id: 3, name_ar: "العالم 3: الفوضى الحركية", name_en: "World 3: Kinetic Chaos", levels: [21, 30], color: "#ff007f", desc_ar: "شفرات دوارة وتفاعلات تفجير متسلسلة", desc_en: "High-speed spinners & explosive chain reactions" },
+  { id: 4, name_ar: "العالم 4: حقول الجاذبية الكونية", name_en: "World 4: Gravitational Wells", levels: [31, 40], color: "#ffb703", desc_ar: "انحناء المسار بالثقوب الدودية والمجالات المغناطيسية", desc_en: "Trajectory bending & gravitational vortices" },
+  { id: 5, name_ar: "العالم 5: قمة المجرة الأسطورية", name_en: "World 5: Celestial Apex", levels: [41, 50], color: "#06d6a0", desc_ar: "أقصى تحديات الأطياف وحصون الليزر المحصنة", desc_en: "Ultimate dual spirit mastery & fortified lasers" },
 ];
 
 const HANDCRAFTED_LEVELS = [
@@ -80,20 +82,25 @@ const HANDCRAFTED_LEVELS = [
       { type: 'crystal', x: 0.85, y: 0.24, radius: 22, color: 'magenta', hp: 1 }
     ]
   },
-  // 5: Slanted Reflections
+  // 5: Neon Domino Rush
   {
     world: 1,
-    name_ar: "انعكاسات مائلة",
-    name_en: "Slanted Rebound",
+    name_ar: "سلسلة الدومينو النيونية",
+    name_en: "Neon Domino Rush",
     shots: 3,
-    desc_ar: "الحواجز المائلة تعيد توجيه الأطياف بزوايا حادة",
-    desc_en: "Slanted deflectors redirect spirits at sharp lethal angles",
+    desc_ar: "سلسلة تفاعلات متتابعة ساحرة! زاوية واحدة ذكية تطلق عاصفة تفجير الدومينو 💥",
+    desc_en: "Hypnotic domino chain reaction! Find the sweet angle to spark the room-clearing blast 💥",
     elements: [
-      { type: 'wall', x: 0.35, y: 0.45, width: 0.26, height: 0.025, angle: 0.35 },
-      { type: 'wall', x: 0.65, y: 0.45, width: 0.26, height: 0.025, angle: -0.35 },
-      { type: 'crystal', x: 0.5, y: 0.25, radius: 25, color: 'cyan', hp: 1 },
-      { type: 'crystal', x: 0.22, y: 0.18, radius: 24, color: 'magenta', hp: 1 },
-      { type: 'crystal', x: 0.78, y: 0.18, radius: 24, color: 'cyan', hp: 1 }
+      { type: 'bumper', x: 0.50, y: 0.38, radius: 24, color: '#ff007f' },
+      { type: 'wall', x: 0.22, y: 0.44, width: 0.22, height: 0.025, angle: 0.25 },
+      { type: 'wall', x: 0.78, y: 0.44, width: 0.22, height: 0.025, angle: -0.25 },
+      { type: 'crystal', x: 0.35, y: 0.28, radius: 23, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.65, y: 0.28, radius: 23, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.22, y: 0.20, radius: 23, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.78, y: 0.20, radius: 23, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.38, y: 0.14, radius: 25, color: 'synergy', hp: 1, subType: 'bomb' },
+      { type: 'crystal', x: 0.62, y: 0.14, radius: 25, color: 'synergy', hp: 1, subType: 'bomb' },
+      { type: 'crystal', x: 0.50, y: 0.22, radius: 26, color: 'synergy', hp: 1 }
     ]
   },
   // 6: Triangle Matrix
@@ -111,70 +118,82 @@ const HANDCRAFTED_LEVELS = [
       { type: 'wall', x: 0.5, y: 0.50, width: 0.4, height: 0.03, angle: 0 }
     ]
   },
-  // 7: Volatile Canyon
+  // 7: Glass Shatter Corridor
   {
     world: 1,
-    name_ar: "وادي القنبلة المتفجرة",
-    name_en: "Volatile Canyon",
+    name_ar: "ممر الزجاج المهشم",
+    name_en: "Glass Shatter Corridor",
     shots: 3,
-    desc_ar: "فجّر البلورة المتفجرة 💣 لإحداث تفاعل تسلسلي ساحق يطهر الممر!",
-    desc_en: "Detonate the volatile bomb crystal 💣 to trigger a room-clearing chain blast!",
+    desc_ar: "حواجز زجاج نيونية قابلة للكسر 💎! اضرب الزجاج بقوة لتهشيمه وفتح الممر السري!",
+    desc_en: "Destructible neon glass walls 💎! Shatter through to penetrate the inner vault!",
     elements: [
-      { type: 'wall', x: 0.25, y: 0.40, width: 0.32, height: 0.025, angle: 0 },
-      { type: 'wall', x: 0.75, y: 0.26, width: 0.32, height: 0.025, angle: 0 },
-      { type: 'crystal', x: 0.82, y: 0.40, radius: 23, color: 'cyan', hp: 1 },
-      { type: 'crystal', x: 0.18, y: 0.26, radius: 23, color: 'magenta', hp: 1 },
-      { type: 'crystal', x: 0.50, y: 0.14, radius: 27, color: 'synergy', hp: 1, subType: 'bomb' }
+      { type: 'glassWall', x: 0.35, y: 0.36, width: 0.24, height: 0.025, angle: 0, hp: 1 },
+      { type: 'glassWall', x: 0.65, y: 0.36, width: 0.24, height: 0.025, angle: 0, hp: 1 },
+      { type: 'wall', x: 0.50, y: 0.48, width: 0.025, height: 0.22, angle: 0 },
+      { type: 'crystal', x: 0.35, y: 0.22, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.65, y: 0.22, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.18, y: 0.16, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.82, y: 0.16, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.50, y: 0.14, radius: 28, color: 'synergy', hp: 2 }
     ]
   },
-  // 8: The Orbit Guard
+  // 8: Kinetic Pinball Arena
   {
     world: 1,
-    name_ar: "حارس المدار",
-    name_en: "Orbit Guard",
+    name_ar: "ميدان البينبول الحركي",
+    name_en: "Kinetic Pinball Arena",
     shots: 3,
-    desc_ar: "حاجز دوار يحرس بلورة الطاقة المركزية",
-    desc_en: "A rotating blade guards the central nexus core",
+    desc_ar: "مصدات بينبول نيونية فائقة الطاقة ⚡ تقذف الأطياف بسرعات قياسية خاطفة!",
+    desc_en: "High-voltage kinetic pinball bumpers ⚡ launch spirits at hyper-ricochet speeds!",
     elements: [
-      { type: 'spinner', x: 0.5, y: 0.36, length: 110, speed: 1.2 },
-      { type: 'crystal', x: 0.5, y: 0.20, radius: 28, color: 'synergy', hp: 2 },
-      { type: 'crystal', x: 0.22, y: 0.36, radius: 22, color: 'cyan', hp: 1 },
-      { type: 'crystal', x: 0.78, y: 0.36, radius: 22, color: 'magenta', hp: 1 }
+      { type: 'bumper', x: 0.30, y: 0.42, radius: 24, color: '#00f3ff' },
+      { type: 'bumper', x: 0.70, y: 0.42, radius: 24, color: '#ff007f' },
+      { type: 'bumper', x: 0.50, y: 0.26, radius: 26, color: '#ffb703' },
+      { type: 'wall', x: 0.16, y: 0.28, width: 0.025, height: 0.25, angle: 0.2 },
+      { type: 'wall', x: 0.84, y: 0.28, width: 0.025, height: 0.25, angle: -0.2 },
+      { type: 'crystal', x: 0.50, y: 0.14, radius: 27, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.28, y: 0.18, radius: 23, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.72, y: 0.18, radius: 23, color: 'magenta', hp: 1 }
     ]
   },
-  // 9: Twin Columns
+  // 9: Twin Columns Precision Vault
   {
     world: 1,
-    name_ar: "العمودان المتوازيان",
-    name_en: "Twin Columns",
+    name_ar: "ممر الأعمدة والزجاج المصفح",
+    name_en: "Twin Vault: Reinforced Corridors",
     shots: 3,
-    desc_ar: "أطلق التوأم بزاوية مستقيمة ليرتد كل طيف داخل عموده الخاص",
-    desc_en: "Fire straight so each spirit clears its respective corridor",
+    desc_ar: "ممران ضيقان محميان بجدران زجاجية نيونية تتطلب ارتدادات دقيقة متعددة!",
+    desc_en: "Twin narrow corridors defended by destructible glass & reinforced crystals!",
     elements: [
-      { type: 'wall', x: 0.5, y: 0.32, width: 0.03, height: 0.35, angle: 0 },
-      { type: 'crystal', x: 0.25, y: 0.22, radius: 24, color: 'cyan', hp: 1 },
-      { type: 'crystal', x: 0.25, y: 0.38, radius: 24, color: 'cyan', hp: 1 },
-      { type: 'crystal', x: 0.75, y: 0.22, radius: 24, color: 'magenta', hp: 1 },
-      { type: 'crystal', x: 0.75, y: 0.38, radius: 24, color: 'magenta', hp: 1 }
+      { type: 'wall', x: 0.5, y: 0.32, width: 0.03, height: 0.36, angle: 0 },
+      { type: 'glassWall', x: 0.25, y: 0.28, width: 0.22, height: 0.025, angle: 0, hp: 1 },
+      { type: 'glassWall', x: 0.75, y: 0.28, width: 0.22, height: 0.025, angle: 0, hp: 1 },
+      { type: 'bumper', x: 0.50, y: 0.52, radius: 24, color: '#ffb703' },
+      { type: 'crystal', x: 0.25, y: 0.18, radius: 25, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.25, y: 0.38, radius: 25, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.75, y: 0.18, radius: 25, color: 'magenta', hp: 2 },
+      { type: 'crystal', x: 0.75, y: 0.38, radius: 25, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.50, y: 0.12, radius: 28, color: 'synergy', hp: 2, hasShield: true }
     ]
   },
-  // 10: Genesis Climax (World 1 Boss)
+  // 10: World 1 Boss - Orion Nexus Core
   {
     world: 1,
-    name_ar: "تاج النيون: ذروة التأسيس",
-    name_en: "Neon Crown: Genesis Climax",
-    shots: 4,
-    desc_ar: "تحدي نهاية العالم الأول: حصن بلوري محمي بدرع طاقة وقنبلة مساعدة!",
-    desc_en: "World 1 Climax: Fortified crown guarded by an energy shield & volatile core!",
+    name_ar: "زعيم سديم النيون: نواة أوريون المحصنة 👑",
+    name_en: "World 1 Boss: Orion Nexus Core 👑",
+    shots: 3,
+    desc_ar: "معركة الزعيم الكبرى: نواة رباعية الطاقة محصنة بدرع وشفرات دوران فائقة وبوابة ليزر!",
+    desc_en: "World 1 Climax: Quad-armored Boss Core guarded by hyper-rotors, laser barrier & switch!",
     elements: [
-      { type: 'spinner', x: 0.5, y: 0.42, length: 100, speed: -1.4 },
-      { type: 'wall', x: 0.5, y: 0.26, width: 0.35, height: 0.025, angle: 0 },
-      { type: 'crystal', x: 0.5, y: 0.16, radius: 30, color: 'synergy', hp: 2, hasShield: true },
-      { type: 'crystal', x: 0.5, y: 0.32, radius: 24, color: 'synergy', hp: 1, subType: 'bomb' },
-      { type: 'crystal', x: 0.24, y: 0.20, radius: 24, color: 'cyan', hp: 1 },
-      { type: 'crystal', x: 0.76, y: 0.20, radius: 24, color: 'magenta', hp: 1 },
-      { type: 'crystal', x: 0.18, y: 0.34, radius: 22, color: 'cyan', hp: 1 },
-      { type: 'crystal', x: 0.82, y: 0.34, radius: 22, color: 'magenta', hp: 1 }
+      { type: 'spinner', x: 0.30, y: 0.44, length: 85, speed: 2.4 },
+      { type: 'spinner', x: 0.70, y: 0.44, length: 85, speed: -2.4 },
+      { type: 'switch', x: 0.50, y: 0.56, radius: 18, gateId: 'gateBossW1', color: '#00f3ff' },
+      { type: 'gate', id: 'gateBossW1', x1: 0.25, y1: 0.28, x2: 0.75, y2: 0.28, color: '#ff007f' },
+      { type: 'bumper', x: 0.16, y: 0.28, radius: 22, color: '#00f3ff' },
+      { type: 'bumper', x: 0.84, y: 0.28, radius: 22, color: '#ff007f' },
+      { type: 'crystal', x: 0.50, y: 0.15, radius: 34, color: 'synergy', hp: 4, hasShield: true },
+      { type: 'crystal', x: 0.24, y: 0.18, radius: 25, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.76, y: 0.18, radius: 25, color: 'magenta', hp: 2 }
     ]
   },
 
@@ -312,38 +331,42 @@ const HANDCRAFTED_LEVELS = [
       { type: 'crystal', x: 0.50, y: 0.12, radius: 28, color: 'synergy', hp: 2 }
     ]
   },
-  // 19: Laser Gate Security
+  // 19: Laser Gate Security & Hyper Rotor
   {
     world: 2,
-    name_ar: "بوابة الليزر الأمنية",
-    name_en: "Laser Gate Security",
-    shots: 4,
-    desc_ar: "اضرب المفتاح النيوني ⚡ لتعطيل بوابة الليزر والوصول إلى البلورة المحمية!",
-    desc_en: "Strike the neon switch ⚡ to disable the security laser gate barrier!",
+    name_ar: "بوابة الليزر والشفرة الحارسة",
+    name_en: "Laser Gate & Guard Rotor",
+    shots: 3,
+    desc_ar: "شفرة سريعة تحرس مفتاح الليزر، بينما النواة المحصنة محمية بدرع مزدوج!",
+    desc_en: "High-speed rotor guards the laser switch while the core rests behind energy barriers!",
     elements: [
-      { type: 'switch', x: 0.22, y: 0.45, radius: 18, gateId: 'gate1', color: '#00f3ff' },
+      { type: 'spinner', x: 0.22, y: 0.38, length: 75, speed: 2.2 },
+      { type: 'switch', x: 0.22, y: 0.50, radius: 18, gateId: 'gate1', color: '#00f3ff' },
       { type: 'gate', id: 'gate1', x1: 0.35, y1: 0.25, x2: 0.65, y2: 0.25, color: '#ff0055' },
-      { type: 'crystal', x: 0.5, y: 0.15, radius: 28, color: 'synergy', hp: 2, hasShield: true },
-      { type: 'crystal', x: 0.78, y: 0.45, radius: 24, color: 'magenta', hp: 1 }
+      { type: 'crystal', x: 0.50, y: 0.15, radius: 30, color: 'synergy', hp: 3, hasShield: true },
+      { type: 'crystal', x: 0.78, y: 0.30, radius: 24, color: 'magenta', hp: 2 },
+      { type: 'crystal', x: 0.78, y: 0.48, radius: 24, color: 'cyan', hp: 2 }
     ]
   },
   // 20: Aether Climax (World 2 Boss)
   {
     world: 2,
-    name_ar: "سيد الأثير: ملحمة البوابات",
-    name_en: "Aether Sovereign: Portal Saga",
-    shots: 4,
-    desc_ar: "ذروة العالم الثاني: جاذبية كونية وبوابات أثيرية تحرس نواة محصنة بدرع!",
-    desc_en: "World 2 Climax: Cosmic gravity & portals guard a shielded fortress core!",
+    name_ar: "سيد الأثير: ملحمة البوابات 👑",
+    name_en: "Aether Sovereign: Portal Saga 👑",
+    shots: 3,
+    desc_ar: "ذروة العالم الثاني: جاذبية كونية، شفرات متزامنة وبوابات أثيرية تحرس نواة رباعية الدرع!",
+    desc_en: "World 2 Climax: Singularity well, twin rotors & portals guarding quad-HP core!",
     elements: [
-      { type: 'gravity', x: 0.5, y: 0.36, radius: 32, strength: 2.0, mode: 'pull' },
-      { type: 'switch', x: 0.5, y: 0.52, radius: 18, gateId: 'bossGate', color: '#00f3ff' },
-      { type: 'gate', id: 'bossGate', x1: 0.35, y1: 0.24, x2: 0.65, y2: 0.24, color: '#ff0055' },
-      { type: 'portal', x: 0.18, y: 0.45, radius: 22, color: '#4361ee', pairId: 7, targetX: 0.82, targetY: 0.18 },
-      { type: 'portal', x: 0.82, y: 0.18, radius: 22, color: '#f77f00', pairId: 7, targetX: 0.18, targetY: 0.45 },
-      { type: 'crystal', x: 0.5, y: 0.14, radius: 32, color: 'synergy', hp: 2, hasShield: true },
-      { type: 'crystal', x: 0.24, y: 0.28, radius: 24, color: 'cyan', hp: 1, subType: 'bomb' },
-      { type: 'crystal', x: 0.76, y: 0.28, radius: 24, color: 'magenta', hp: 1, subType: 'bomb' }
+      { type: 'gravity', x: 0.50, y: 0.36, radius: 32, strength: 2.5, mode: 'pull' },
+      { type: 'spinner', x: 0.18, y: 0.36, length: 70, speed: -2.4 },
+      { type: 'spinner', x: 0.82, y: 0.36, length: 70, speed: 2.4 },
+      { type: 'switch', x: 0.50, y: 0.54, radius: 18, gateId: 'bossGate', color: '#00f3ff' },
+      { type: 'gate', id: 'bossGate', x1: 0.32, y1: 0.24, x2: 0.68, y2: 0.24, color: '#ff0055' },
+      { type: 'portal', x: 0.18, y: 0.48, radius: 22, color: '#4361ee', pairId: 7, targetX: 0.82, targetY: 0.16 },
+      { type: 'portal', x: 0.82, y: 0.16, radius: 22, color: '#f77f00', pairId: 7, targetX: 0.18, targetY: 0.48 },
+      { type: 'crystal', x: 0.50, y: 0.14, radius: 34, color: 'synergy', hp: 4, hasShield: true },
+      { type: 'crystal', x: 0.24, y: 0.24, radius: 25, color: 'cyan', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.76, y: 0.24, radius: 25, color: 'magenta', hp: 2, subType: 'bomb' }
     ]
   },
 
@@ -495,45 +518,411 @@ const HANDCRAFTED_LEVELS = [
     world: 3,
     name_ar: "ممر الجاذبية وبوابة الحصار",
     name_en: "Singularity Corridor & Siege Gate",
-    shots: 5,
+    shots: 4,
     desc_ar: "ممر ضيق مع بئر جاذبية يبتلع المسار وبوابة ليزر تحمي النواة الفائقة!",
     desc_en: "Narrow channel with intense gravity curvature and laser barrier guarding the nexus!",
     elements: [
       { type: 'wall', x: 0.26, y: 0.40, width: 0.025, height: 0.35, angle: 0 },
       { type: 'wall', x: 0.74, y: 0.40, width: 0.025, height: 0.35, angle: 0 },
-      { type: 'gravity', x: 0.5, y: 0.42, radius: 30, strength: 2.4, mode: 'pull' },
+      { type: 'gravity', x: 0.5, y: 0.42, radius: 30, strength: 2.6, mode: 'pull' },
       { type: 'switch', x: 0.14, y: 0.42, radius: 18, gateId: 'gateW3_3', color: '#00f3ff' },
       { type: 'gate', id: 'gateW3_3', x1: 0.30, y1: 0.26, x2: 0.70, y2: 0.26, color: '#ff0055' },
-      { type: 'spinner', x: 0.5, y: 0.52, length: 80, speed: 2.2 },
-      { type: 'crystal', x: 0.5, y: 0.15, radius: 30, color: 'synergy', hp: 3, hasShield: true },
-      { type: 'crystal', x: 0.86, y: 0.35, radius: 24, color: 'magenta', hp: 1, subType: 'bomb' }
+      { type: 'spinner', x: 0.5, y: 0.52, length: 85, speed: 2.5 },
+      { type: 'crystal', x: 0.5, y: 0.15, radius: 32, color: 'synergy', hp: 4, hasShield: true },
+      { type: 'crystal', x: 0.86, y: 0.35, radius: 24, color: 'magenta', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.14, y: 0.25, radius: 24, color: 'cyan', hp: 2 }
     ]
   },
   // 30: Grand Master Symphony (World 3 Grand Climax)
   {
     world: 3,
-    name_ar: "سيمفونية التناغم الكبرى: العرش النيوني",
-    name_en: "Grand Master Symphony: Neon Throne",
-    shots: 5,
-    desc_ar: "الاختبار النهائي لحملة العوالم: بوابات، جاذبية، حواجز ليزر، شفرات متزامنة ونواة محصنة بدرع!",
-    desc_en: "The Ultimate Campaign Finale: Portals, gravity, laser security, dual rotors & shielded core!",
+    name_ar: "سيمفونية التناغم الكبرى: العرش النيوني 👑",
+    name_en: "Grand Master Symphony: Neon Throne 👑",
+    shots: 4,
+    desc_ar: "ذروة العالم الثالث: بوابات، جاذبية، حواجز ليزر، شفرات متزامنة ونواة رباعية الطاقة!",
+    desc_en: "World 3 Climax: Portals, gravity, laser security, dual high-speed rotors & quad-HP core!",
     elements: [
-      { type: 'spinner', x: 0.30, y: 0.46, length: 85, speed: 2.0 },
-      { type: 'spinner', x: 0.70, y: 0.46, length: 85, speed: -2.0 },
-      { type: 'gravity', x: 0.50, y: 0.36, radius: 32, strength: 2.2, mode: 'pull' },
+      { type: 'spinner', x: 0.30, y: 0.46, length: 85, speed: 2.6 },
+      { type: 'spinner', x: 0.70, y: 0.46, length: 85, speed: -2.6 },
+      { type: 'gravity', x: 0.50, y: 0.36, radius: 32, strength: 2.6, mode: 'pull' },
       { type: 'switch', x: 0.50, y: 0.56, radius: 18, gateId: 'gateFinale', color: '#ff007f' },
       { type: 'gate', id: 'gateFinale', x1: 0.32, y1: 0.25, x2: 0.68, y2: 0.25, color: '#00f3ff' },
       { type: 'portal', x: 0.16, y: 0.56, radius: 22, color: '#4361ee', pairId: 10, targetX: 0.84, targetY: 0.16 },
       { type: 'portal', x: 0.84, y: 0.16, radius: 22, color: '#f77f00', pairId: 10, targetX: 0.16, targetY: 0.56 },
-      { type: 'crystal', x: 0.50, y: 0.14, radius: 32, color: 'synergy', hp: 3, hasShield: true },
+      { type: 'crystal', x: 0.50, y: 0.14, radius: 34, color: 'synergy', hp: 4, hasShield: true },
       { type: 'crystal', x: 0.22, y: 0.22, radius: 26, color: 'cyan', hp: 2, subType: 'bomb' },
       { type: 'crystal', x: 0.78, y: 0.22, radius: 26, color: 'magenta', hp: 2, subType: 'bomb' }
+    ]
+  },
+
+  // ==========================================
+  // WORLD 4: GRAVITATIONAL WELLS (Stages 31 - 40)
+  // ==========================================
+  // 31: Orbit of the Void
+  {
+    world: 4,
+    name_ar: "مدار الثقب الأسود",
+    name_en: "Orbit of the Void",
+    shots: 4,
+    desc_ar: "حقل الجاذبية المركزي يحني مسار الأطياف في مدار بيضاوي ساحر",
+    desc_en: "A central gravity well curves spirit trajectories into an elliptical orbit",
+    elements: [
+      { type: 'gravity', x: 0.50, y: 0.32, radius: 28, strength: 2.4, mode: 'pull' },
+      { type: 'crystal', x: 0.30, y: 0.22, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.70, y: 0.22, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.22, y: 0.38, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.78, y: 0.38, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.50, y: 0.16, radius: 28, color: 'synergy', hp: 2 }
+    ]
+  },
+  // 32: Twin Gravity Slingshot
+  {
+    world: 4,
+    name_ar: "المقلاع الكوني الثنائي",
+    name_en: "Twin Slingshot",
+    shots: 4,
+    desc_ar: "دوامتان متعاكستان تجذبان الأطياف كالمذنبات عبر الممر الضيق",
+    desc_en: "Twin opposing gravity wells slingshot spirits like comets through a corridor",
+    elements: [
+      { type: 'gravity', x: 0.28, y: 0.35, radius: 25, strength: 2.0, mode: 'pull' },
+      { type: 'gravity', x: 0.72, y: 0.35, radius: 25, strength: 2.0, mode: 'pull' },
+      { type: 'wall', x: 0.50, y: 0.35, width: 0.04, height: 0.22, angle: 0 },
+      { type: 'crystal', x: 0.28, y: 0.18, radius: 25, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.72, y: 0.18, radius: 25, color: 'magenta', hp: 2 },
+      { type: 'crystal', x: 0.50, y: 0.14, radius: 28, color: 'synergy', hp: 2 }
+    ]
+  },
+  // 33: Prism Nebula Well
+  {
+    world: 4,
+    name_ar: "متاهة المنشور والجاذبية",
+    name_en: "Prism Nebula Well",
+    shots: 4,
+    desc_ar: "الجاذبية تدفع الأطياف عبر المنشور لتفعيل طاقة السينرجي الخارقة",
+    desc_en: "Gravity steers spirits through the central prism to ignite synergy power",
+    elements: [
+      { type: 'gravity', x: 0.50, y: 0.45, radius: 30, strength: 2.2, mode: 'pull' },
+      { type: 'prism', x: 0.50, y: 0.30, radius: 30, transformTo: 'synergy' },
+      { type: 'crystal', x: 0.20, y: 0.24, radius: 25, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.80, y: 0.24, radius: 25, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.35, y: 0.14, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.65, y: 0.14, radius: 24, color: 'magenta', hp: 1 }
+    ]
+  },
+  // 34: Event Horizon Portals
+  {
+    world: 4,
+    name_ar: "بوابات أفق الحدث",
+    name_en: "Event Horizon Portals",
+    shots: 4,
+    desc_ar: "بوابات فضاء تقذف الأطياف مباشرة في فوهة الجاذبية لاكتساب سرعة قصوى",
+    desc_en: "Cosmic portals launch spirits straight into gravitational slingshots",
+    elements: [
+      { type: 'portal', x: 0.18, y: 0.52, radius: 22, color: '#4361ee', pairId: 11, targetX: 0.82, targetY: 0.20 },
+      { type: 'portal', x: 0.82, y: 0.20, radius: 22, color: '#f77f00', pairId: 11, targetX: 0.18, targetY: 0.52 },
+      { type: 'gravity', x: 0.62, y: 0.28, radius: 26, strength: 2.5, mode: 'pull' },
+      { type: 'crystal', x: 0.40, y: 0.22, radius: 26, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.62, y: 0.12, radius: 28, color: 'synergy', hp: 2, hasShield: true },
+      { type: 'crystal', x: 0.84, y: 0.38, radius: 24, color: 'magenta', hp: 1 }
+    ]
+  },
+  // 35: Pulsar Repulsion Tempest
+  {
+    world: 4,
+    name_ar: "نبض البولسار النابذ",
+    name_en: "Pulsar Repulsion Tempest",
+    shots: 4,
+    desc_ar: "حقل نبذ قوي يدفع الأطياف نحو محيط البلورات، احسب زاوية الارتطام!",
+    desc_en: "A strong repulsive well deflects spirits outward toward perimeter crystals!",
+    elements: [
+      { type: 'gravity', x: 0.50, y: 0.32, radius: 34, strength: 2.8, mode: 'push' },
+      { type: 'crystal', x: 0.20, y: 0.20, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.80, y: 0.20, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.20, y: 0.44, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.80, y: 0.44, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.50, y: 0.12, radius: 28, color: 'synergy', hp: 3, hasShield: true }
+    ]
+  },
+  // 36: Gravitational Laser Vault
+  {
+    world: 4,
+    name_ar: "حصن الليزر والجاذبية",
+    name_en: "Gravitational Laser Vault",
+    shots: 4,
+    desc_ar: "اضرب المفتاح لتعطيل شعاع الليزر بينما تدور كرتك حول حقل الجاذبية",
+    desc_en: "Hit the switch to drop the laser barrier while orbiting the gravity well",
+    elements: [
+      { type: 'switch', x: 0.24, y: 0.45, radius: 18, gateId: 'gateW4', color: '#ffb703' },
+      { type: 'gate', id: 'gateW4', x1: 0.25, y1: 0.26, x2: 0.75, y2: 0.26, color: '#ff007f' },
+      { type: 'gravity', x: 0.50, y: 0.40, radius: 28, strength: 2.2, mode: 'pull' },
+      { type: 'crystal', x: 0.50, y: 0.16, radius: 30, color: 'synergy', hp: 3, hasShield: true },
+      { type: 'crystal', x: 0.35, y: 0.20, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.65, y: 0.20, radius: 24, color: 'magenta', hp: 1 }
+    ]
+  },
+  // 37: Vortex Trinity
+  {
+    world: 4,
+    name_ar: "ثالوث الدوامات الكونية",
+    name_en: "Vortex Trinity",
+    shots: 4,
+    desc_ar: "ثلاث دوامات متقاطعة ترسم مسارات منحنية فائقة الدقة",
+    desc_en: "Three intersecting vortices sculpt intricate curved trajectories",
+    elements: [
+      { type: 'gravity', x: 0.30, y: 0.28, radius: 24, strength: 1.8, mode: 'pull' },
+      { type: 'gravity', x: 0.70, y: 0.28, radius: 24, strength: 1.8, mode: 'pull' },
+      { type: 'gravity', x: 0.50, y: 0.46, radius: 26, strength: 2.2, mode: 'pull' },
+      { type: 'crystal', x: 0.50, y: 0.28, radius: 26, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.25, y: 0.14, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.75, y: 0.14, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.50, y: 0.10, radius: 28, color: 'synergy', hp: 2, hasShield: true }
+    ]
+  },
+  // 38: Armored Bastion Orbit
+  {
+    world: 4,
+    name_ar: "مدار الحصن المصفح",
+    name_en: "Armored Bastion Orbit",
+    shots: 4,
+    desc_ar: "شفرة حركية دوارة وجاذبية تحميان بلورات الدروع المحصنة",
+    desc_en: "A revolving spinner and gravity well guard heavy shielded crystals",
+    elements: [
+      { type: 'spinner', x: 0.50, y: 0.34, length: 90, speed: 1.8 },
+      { type: 'gravity', x: 0.50, y: 0.48, radius: 28, strength: 2.0, mode: 'pull' },
+      { type: 'crystal', x: 0.28, y: 0.22, radius: 26, color: 'cyan', hp: 2, hasShield: true },
+      { type: 'crystal', x: 0.72, y: 0.22, radius: 26, color: 'magenta', hp: 2, hasShield: true },
+      { type: 'crystal', x: 0.50, y: 0.16, radius: 30, color: 'synergy', hp: 3, hasShield: true }
+    ]
+  },
+  // 39: Supernova Chain Cascade
+  {
+    world: 4,
+    name_ar: "شلال الانفجار المتسلسل",
+    name_en: "Supernova Chain Cascade",
+    shots: 3,
+    desc_ar: "فجّر بلورة المتفجرات في الجاذبية لتطلق تفاعلاً متسلسلاً مذهلاً!",
+    desc_en: "Detonate the bomb crystal within the gravity well to ignite a screen-clearing chain reaction!",
+    elements: [
+      { type: 'gravity', x: 0.50, y: 0.30, radius: 28, strength: 2.2, mode: 'pull' },
+      { type: 'crystal', x: 0.50, y: 0.30, radius: 28, color: 'cyan', hp: 1, subType: 'bomb' },
+      { type: 'crystal', x: 0.30, y: 0.20, radius: 25, color: 'magenta', hp: 2 },
+      { type: 'crystal', x: 0.70, y: 0.20, radius: 25, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.25, y: 0.38, radius: 24, color: 'cyan', hp: 1 },
+      { type: 'crystal', x: 0.75, y: 0.38, radius: 24, color: 'magenta', hp: 1 },
+      { type: 'crystal', x: 0.50, y: 0.12, radius: 30, color: 'synergy', hp: 2 }
+    ]
+  },
+  // 40: Singularity Core (World 4 Grand Finale)
+  {
+    world: 4,
+    name_ar: "نواة التفرد الكوني: عرش الجاذبية 👑",
+    name_en: "Singularity Core: Gravity Apex 👑",
+    shots: 4,
+    desc_ar: "ذروة العالم الرابع: بوابات أفق، شفرات متزامنة فائقة السرعة، وجاذبية خارقة تحيط بالنواة الملكية المحصنة!",
+    desc_en: "World 4 Climax: Portals, hyper twin-rotors, and supreme gravitational singularity guarding the quad-HP core!",
+    elements: [
+      { type: 'gravity', x: 0.50, y: 0.32, radius: 36, strength: 3.0, mode: 'pull' },
+      { type: 'spinner', x: 0.28, y: 0.44, length: 80, speed: -2.8 },
+      { type: 'spinner', x: 0.72, y: 0.44, length: 80, speed: 2.8 },
+      { type: 'bumper', x: 0.12, y: 0.32, radius: 20, color: '#ffb703' },
+      { type: 'bumper', x: 0.88, y: 0.32, radius: 20, color: '#ffb703' },
+      { type: 'portal', x: 0.15, y: 0.55, radius: 22, color: '#4361ee', pairId: 12, targetX: 0.85, targetY: 0.18 },
+      { type: 'portal', x: 0.85, y: 0.18, radius: 22, color: '#f77f00', pairId: 12, targetX: 0.15, targetY: 0.55 },
+      { type: 'crystal', x: 0.50, y: 0.15, radius: 34, color: 'synergy', hp: 4, hasShield: true },
+      { type: 'crystal', x: 0.28, y: 0.24, radius: 26, color: 'cyan', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.72, y: 0.24, radius: 26, color: 'magenta', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.50, y: 0.48, radius: 26, color: 'synergy', hp: 2 }
+    ]
+  },
+
+  // ==========================================
+  // WORLD 5: CELESTIAL APEX (Stages 41 - 50)
+  // ==========================================
+  // 41: Apex Dawn
+  {
+    world: 5,
+    name_ar: "شفق القمة الأسطورية",
+    name_en: "Apex Dawn",
+    shots: 4,
+    desc_ar: "دخول عالم الأسياد: زوايا هندسية ماسية تتطلب دقة متناهية",
+    desc_en: "Entering the realm of champions: Diamond geometry demanding flawless precision",
+    elements: [
+      { type: 'prism', x: 0.30, y: 0.38, radius: 26, transformTo: 'synergy' },
+      { type: 'prism', x: 0.70, y: 0.38, radius: 26, transformTo: 'synergy' },
+      { type: 'crystal', x: 0.30, y: 0.20, radius: 26, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.70, y: 0.20, radius: 26, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.50, y: 0.28, radius: 30, color: 'synergy', hp: 3, hasShield: true }
+    ]
+  },
+  // 42: Clockwork Symphony
+  {
+    world: 5,
+    name_ar: "الرقصة الحركية المتزامنة",
+    name_en: "Clockwork Symphony",
+    shots: 4,
+    desc_ar: "شفرات دوارة متداخلة كتروس الساعة الكونية، اضبط توقيت الإطلاق بدقة",
+    desc_en: "Intermeshed dual spinners rotating like celestial gears, time your launch to perfection",
+    elements: [
+      { type: 'spinner', x: 0.38, y: 0.36, length: 85, speed: 2.4 },
+      { type: 'spinner', x: 0.62, y: 0.36, length: 85, speed: -2.4 },
+      { type: 'crystal', x: 0.20, y: 0.22, radius: 24, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.80, y: 0.22, radius: 24, color: 'magenta', hp: 2 },
+      { type: 'crystal', x: 0.50, y: 0.18, radius: 30, color: 'synergy', hp: 2, hasShield: true }
+    ]
+  },
+  // 43: Diamond Prism Array
+  {
+    world: 5,
+    name_ar: "مصفوفة المنشور الألماسي",
+    name_en: "Diamond Prism Array",
+    shots: 4,
+    desc_ar: "ثلاثة مناشير تحول طاقة الضوء إلى عاصفة متكاملة من أطياف السينرجي",
+    desc_en: "Triple prisms transposing spirit beams into a cascade of pure synergy",
+    elements: [
+      { type: 'prism', x: 0.50, y: 0.44, radius: 28, transformTo: 'synergy' },
+      { type: 'prism', x: 0.28, y: 0.30, radius: 26, transformTo: 'synergy' },
+      { type: 'prism', x: 0.72, y: 0.30, radius: 26, transformTo: 'synergy' },
+      { type: 'crystal', x: 0.50, y: 0.20, radius: 32, color: 'synergy', hp: 3, hasShield: true },
+      { type: 'crystal', x: 0.16, y: 0.22, radius: 24, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.84, y: 0.22, radius: 24, color: 'magenta', hp: 2 }
+    ]
+  },
+  // 44: Dual Laser Gauntlet
+  {
+    world: 5,
+    name_ar: "فخ الليزر المزدوج",
+    name_en: "Dual Laser Gauntlet",
+    shots: 4,
+    desc_ar: "مفتاحان متقابلان يفتحان بوابات الليزر المتقاطعة للوصول إلى النواة",
+    desc_en: "Twin switches disable intersecting laser gates guarding the inner chamber",
+    elements: [
+      { type: 'switch', x: 0.20, y: 0.50, radius: 18, gateId: 'gateW5A', color: '#00f3ff' },
+      { type: 'switch', x: 0.80, y: 0.50, radius: 18, gateId: 'gateW5B', color: '#ff007f' },
+      { type: 'gate', id: 'gateW5A', x1: 0.15, y1: 0.30, x2: 0.50, y2: 0.30, color: '#00f3ff' },
+      { type: 'gate', id: 'gateW5B', x1: 0.50, y1: 0.30, x2: 0.85, y2: 0.30, color: '#ff007f' },
+      { type: 'crystal', x: 0.50, y: 0.18, radius: 32, color: 'synergy', hp: 3, hasShield: true },
+      { type: 'crystal', x: 0.32, y: 0.22, radius: 24, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.68, y: 0.22, radius: 24, color: 'magenta', hp: 2 }
+    ]
+  },
+  // 45: Galactic Minefield
+  {
+    world: 5,
+    name_ar: "حقل الألغام النيوني",
+    name_en: "Galactic Minefield",
+    shots: 3,
+    desc_ar: "تفجيرات متسلسلة كبرى تمسح الشاشة بأكملها في وميض مبهر!",
+    desc_en: "Massive cascade of bomb crystals lighting up the galaxy in pure neon fireworks!",
+    elements: [
+      { type: 'crystal', x: 0.50, y: 0.42, radius: 28, color: 'synergy', hp: 1, subType: 'bomb' },
+      { type: 'crystal', x: 0.25, y: 0.30, radius: 26, color: 'cyan', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.75, y: 0.30, radius: 26, color: 'magenta', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.35, y: 0.16, radius: 26, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.65, y: 0.16, radius: 26, color: 'magenta', hp: 2 },
+      { type: 'crystal', x: 0.50, y: 0.12, radius: 30, color: 'synergy', hp: 3, hasShield: true }
+    ]
+  },
+  // 46: Infinity Loop Transit
+  {
+    world: 5,
+    name_ar: "حلقة اللانهاية الكونية",
+    name_en: "Infinity Loop Transit",
+    shots: 4,
+    desc_ar: "زوجان من البوابات يمرران الأطياف في مسار لانهاية متسارع (∞)",
+    desc_en: "Two pairs of paired wormholes loop spirits in an accelerating infinity cycle (∞)",
+    elements: [
+      { type: 'portal', x: 0.20, y: 0.50, radius: 22, color: '#4361ee', pairId: 13, targetX: 0.80, targetY: 0.24 },
+      { type: 'portal', x: 0.80, y: 0.24, radius: 22, color: '#f77f00', pairId: 13, targetX: 0.20, targetY: 0.50 },
+      { type: 'portal', x: 0.80, y: 0.50, radius: 22, color: '#7209b7', pairId: 14, targetX: 0.20, targetY: 0.24 },
+      { type: 'portal', x: 0.20, y: 0.24, radius: 22, color: '#06d6a0', pairId: 14, targetX: 0.80, targetY: 0.50 },
+      { type: 'crystal', x: 0.50, y: 0.37, radius: 28, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.50, y: 0.15, radius: 32, color: 'synergy', hp: 3, hasShield: true }
+    ]
+  },
+  // 47: Kinetic Maelstrom
+  {
+    world: 5,
+    name_ar: "العاصفة الحركية المطلقة",
+    name_en: "Kinetic Maelstrom",
+    shots: 4,
+    desc_ar: "ثلاث شفرات دوارة سريعة تتطلب حساب زاوية رمي استثنائية",
+    desc_en: "Three high-velocity kinetic rotors demanding surgical angle calculation",
+    elements: [
+      { type: 'spinner', x: 0.25, y: 0.38, length: 75, speed: 2.2 },
+      { type: 'spinner', x: 0.75, y: 0.38, length: 75, speed: -2.2 },
+      { type: 'spinner', x: 0.50, y: 0.48, length: 80, speed: 2.6 },
+      { type: 'crystal', x: 0.50, y: 0.25, radius: 28, color: 'synergy', hp: 2 },
+      { type: 'crystal', x: 0.25, y: 0.18, radius: 24, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.75, y: 0.18, radius: 24, color: 'magenta', hp: 2 },
+      { type: 'crystal', x: 0.50, y: 0.12, radius: 30, color: 'synergy', hp: 3, hasShield: true }
+    ]
+  },
+  // 48: Gravitational Singularity Fortress
+  {
+    world: 5,
+    name_ar: "قلعة الجاذبية المحصنة",
+    name_en: "Gravitational Singularity Fortress",
+    shots: 4,
+    desc_ar: "جاذبية نبضية وحواجز أمان ليزرية تحيط بحصن البلورات الملكي",
+    desc_en: "Pulsating gravity wells and security lasers protecting the royal bastion",
+    elements: [
+      { type: 'gravity', x: 0.50, y: 0.42, radius: 30, strength: 2.5, mode: 'pull' },
+      { type: 'switch', x: 0.50, y: 0.55, radius: 18, gateId: 'gateW5Fort', color: '#ffb703' },
+      { type: 'gate', id: 'gateW5Fort', x1: 0.20, y1: 0.28, x2: 0.80, y2: 0.28, color: '#ff007f' },
+      { type: 'crystal', x: 0.50, y: 0.16, radius: 32, color: 'synergy', hp: 3, hasShield: true },
+      { type: 'crystal', x: 0.25, y: 0.20, radius: 26, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.75, y: 0.20, radius: 26, color: 'magenta', hp: 2 }
+    ]
+  },
+  // 49: The Penultimate Nexus
+  {
+    world: 5,
+    name_ar: "ما قبل الأبدية: التحدي الأعظم",
+    name_en: "The Penultimate Nexus",
+    shots: 4,
+    desc_ar: "مزيج فائق الصعوبة: بوابات، جاذبية، شفرات سريعة ونواة رباعية الطاقة تحرس بوابة العرش!",
+    desc_en: "Ultimate high-stakes trial: Portals, gravity, rapid spinners & 4-HP shielded core!",
+    elements: [
+      { type: 'portal', x: 0.15, y: 0.52, radius: 22, color: '#4361ee', pairId: 15, targetX: 0.85, targetY: 0.18 },
+      { type: 'portal', x: 0.85, y: 0.18, radius: 22, color: '#f77f00', pairId: 15, targetX: 0.15, targetY: 0.52 },
+      { type: 'gravity', x: 0.50, y: 0.38, radius: 28, strength: 2.6, mode: 'pull' },
+      { type: 'spinner', x: 0.50, y: 0.50, length: 85, speed: 2.6 },
+      { type: 'prism', x: 0.50, y: 0.26, radius: 28, transformTo: 'synergy' },
+      { type: 'crystal', x: 0.50, y: 0.12, radius: 34, color: 'synergy', hp: 4, hasShield: true },
+      { type: 'crystal', x: 0.25, y: 0.22, radius: 26, color: 'cyan', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.75, y: 0.22, radius: 26, color: 'magenta', hp: 2, subType: 'bomb' }
+    ]
+  },
+  // 50: The Eternal Throne (Grand 50-Stage Campaign Finale)
+  {
+    world: 5,
+    name_ar: "عرش رويا وآريا الأبدي: تتويج الأساطير 👑",
+    name_en: "The Eternal Throne: Celestial Apex Finale 👑",
+    shots: 4,
+    desc_ar: "الذروة الأسطورية الكبرى لحملة الـ 50 مرحلة: عرش الأطياف الخالد، شفرات فائقة، جاذبية عملاقة ونواة خماسية محصنة!",
+    desc_en: "The Grand 50-Stage Campaign Finale: 5-HP Shielded Apex Core, high-velocity rotors, singularity pull & laser fortress!",
+    elements: [
+      { type: 'spinner', x: 0.26, y: 0.46, length: 90, speed: 2.8 },
+      { type: 'spinner', x: 0.74, y: 0.46, length: 90, speed: -2.8 },
+      { type: 'gravity', x: 0.50, y: 0.35, radius: 35, strength: 3.0, mode: 'pull' },
+      { type: 'switch', x: 0.50, y: 0.58, radius: 20, gateId: 'gateGrand50', color: '#ffb703' },
+      { type: 'gate', id: 'gateGrand50', x1: 0.22, y1: 0.24, x2: 0.78, y2: 0.24, color: '#b537f2' },
+      { type: 'portal', x: 0.12, y: 0.58, radius: 24, color: '#4361ee', pairId: 16, targetX: 0.88, targetY: 0.16 },
+      { type: 'portal', x: 0.88, y: 0.16, radius: 24, color: '#f77f00', pairId: 16, targetX: 0.12, targetY: 0.58 },
+      { type: 'prism', x: 0.50, y: 0.46, radius: 28, transformTo: 'synergy' },
+      { type: 'bumper', x: 0.12, y: 0.35, radius: 22, color: '#00f3ff' },
+      { type: 'bumper', x: 0.88, y: 0.35, radius: 22, color: '#ff007f' },
+      { type: 'crystal', x: 0.50, y: 0.12, radius: 38, color: 'synergy', hp: 5, hasShield: true },
+      { type: 'crystal', x: 0.22, y: 0.19, radius: 28, color: 'cyan', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.78, y: 0.19, radius: 28, color: 'magenta', hp: 2, subType: 'bomb' },
+      { type: 'crystal', x: 0.34, y: 0.29, radius: 24, color: 'cyan', hp: 2 },
+      { type: 'crystal', x: 0.66, y: 0.29, radius: 24, color: 'magenta', hp: 2 }
     ]
   }
 ];
 
 /**
- * Procedural Level Generator for Endless Stages (Level 31+)
+ * Procedural Level Generator for Endless Stages (Level 51+)
  * Generates endless challenges with increasing difficulty, dynamic seeded layouts, and guaranteed solvability.
  */
 function generateProceduralLevel(levelNum) {
@@ -544,7 +933,7 @@ function generateProceduralLevel(levelNum) {
   };
 
   const isEn = window.i18n && window.i18n.getLang() === 'en';
-  const difficultyFactor = Math.min(1.0, 0.45 * Math.log(1 + 0.14 * (levelNum - 30)));
+  const difficultyFactor = Math.min(1.0, 0.45 * Math.log(1 + 0.14 * Math.max(1, levelNum - 50)));
   const crystalCount = 5 + Math.floor(difficultyFactor * 6); // 5 to 11 crystals
   const shots = 4 + Math.floor(crystalCount / 3);
 

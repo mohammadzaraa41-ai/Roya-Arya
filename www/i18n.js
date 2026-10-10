@@ -25,6 +25,7 @@
       combo_prefix: 'COMBO x',
 
       // Title Screen
+      skip_intro: 'تخطي',
       game_tagline: 'Neon Ricochet & Harmonic Spirits',
       spirit_roya_name: 'Roya',
       spirit_roya_role: 'طيف رويا الأزرق',
@@ -32,14 +33,14 @@
       spirit_arya_role: 'طيف الطاقة الوردي',
       game_intro_desc: 'وجّه الروحين التوأم عبر المنشورات والبوابات النيونية لتفتيت بلورات الظلام بأقل عدد من الارتدادات!',
       
-      tab_campaign: 'حملة العوالم (30 مرحلة)',
+      tab_campaign: 'حملة العوالم (50 مرحلة)',
       tab_endless: 'النمط اللانهائي السريع 🔥',
       btn_play: 'ابدأ اللعب الآن',
       btn_levels: 'المراحل',
       btn_skins: 'الأطياف',
       btn_achievements: 'الأوسمة',
       daily_reward_tag: 'مكافأة الأطياف السريعة',
-      daily_reward_title: 'شاهد إعلاناً واحصل على <strong>+100 💎 جوهرة</strong> مجاناً!',
+      daily_reward_title: 'شاهد إعلاناً واحصل على <strong>+50 💎 جوهرة</strong> مجاناً!',
       btn_claim_reward: 'مكافأة 🎬',
       privacy_policy: 'سياسة الخصوصية | Privacy Policy',
 
@@ -54,8 +55,8 @@
       stat_score: 'النقاط',
       stat_max_combo: 'أعلى كومبو',
       stat_gems: 'الجواهر',
-      btn_double_reward_ad: '🎬 شاهد إعلاناً وضاعف الجواهر',
-      btn_double_reward_done: 'تمت مضاعفة المكافأة بنجاح! ✓',
+      btn_double_reward_ad: '🎬 شاهد إعلاناً واحصل على بونص (+25 💎)',
+      btn_double_reward_done: 'تم استلام +25 💎 بنجاح! ✓',
       btn_next_level: 'المرحلة التالية',
       btn_replay_level: 'إعادة المحاولة',
 
@@ -133,6 +134,7 @@
       combo_prefix: 'COMBO x',
 
       // Title Screen
+      skip_intro: 'SKIP',
       game_tagline: 'Neon Ricochet & Harmonic Spirits',
       spirit_roya_name: 'Roya',
       spirit_roya_role: 'Cyan Pulse Spirit',
@@ -140,14 +142,14 @@
       spirit_arya_role: 'Magenta Flame Spirit',
       game_intro_desc: 'Guide the twin spirits through prisms and cosmic portals to shatter dark crystals with minimum ricochets!',
       
-      tab_campaign: 'Worlds Campaign (30 Stages)',
+      tab_campaign: 'Worlds Campaign (50 Stages)',
       tab_endless: 'Fast Endless Mode 🔥',
       btn_play: 'PLAY NOW',
       btn_levels: 'Stages',
       btn_skins: 'Skins',
       btn_achievements: 'Achievements',
       daily_reward_tag: 'Quick Spirit Reward',
-      daily_reward_title: 'Watch an ad and get <strong>+100 💎 Gems</strong> free!',
+      daily_reward_title: 'Watch an ad and get <strong>+50 💎 Gems</strong> free!',
       btn_claim_reward: 'Reward 🎬',
       privacy_policy: 'Privacy Policy',
 
@@ -162,8 +164,8 @@
       stat_score: 'Score',
       stat_max_combo: 'Max Combo',
       stat_gems: 'Gems',
-      btn_double_reward_ad: '🎬 Watch Ad & Double Gems',
-      btn_double_reward_done: 'Reward Doubled Successfully! ✓',
+      btn_double_reward_ad: '🎬 Watch Ad for Mega Bonus (+25 💎)',
+      btn_double_reward_done: 'Mega Bonus (+25 💎) Claimed Successfully! ✓',
       btn_next_level: 'Next Stage',
       btn_replay_level: 'Retry',
 

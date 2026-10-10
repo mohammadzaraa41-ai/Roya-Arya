@@ -62,7 +62,7 @@ class SoundEngine {
       // Harmonic resonance glide
       osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, t + 0.12);
     } else {
-      // Crisp bell bell-like decay
+      // Crisp bell-like decay
       osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.05, t + 0.08);
     }
 
@@ -74,6 +74,19 @@ class SoundEngine {
 
     osc.start(t);
     osc.stop(t + (type === 'prism' ? 0.36 : 0.23));
+
+    // Sparkling Crystalline Harmonic Overtone
+    const overtone = this.ctx.createOscillator();
+    const overGain = this.ctx.createGain();
+    overtone.type = 'sine';
+    overtone.frequency.setValueAtTime(baseFreq * 2, t);
+    overtone.frequency.exponentialRampToValueAtTime(baseFreq * 2.04, t + 0.1);
+    overGain.gain.setValueAtTime(0.11, t);
+    overGain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    overtone.connect(overGain);
+    overGain.connect(this.ctx.destination);
+    overtone.start(t);
+    overtone.stop(t + 0.29);
   }
 
   // Shot release pluck
@@ -387,6 +400,84 @@ class SoundEngine {
 
     osc.start(t);
     osc.stop(t + 0.52);
+  }
+
+  // Neon Pinball Bumper high-energy ping
+  playBumperHit() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(587.33, t); // D5
+    osc.frequency.exponentialRampToValueAtTime(1174.66, t + 0.08); // D6
+
+    gain.gain.setValueAtTime(0.35, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(t);
+    osc.stop(t + 0.19);
+  }
+
+  // Neon Glass Wall shatter crunch
+  playGlassShatter() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    [880, 1318, 1760].forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, t + idx * 0.02);
+      osc.frequency.exponentialRampToValueAtTime(260, t + idx * 0.02 + 0.14);
+
+      gain.gain.setValueAtTime(0.18, t + idx * 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.02 + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t + idx * 0.02);
+      osc.stop(t + idx * 0.02 + 0.23);
+    });
+  }
+
+  // Cinematic Intro celestial swell & harmonic chord
+  playIntroCelestial() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const chords = [261.63, 329.63, 392.00, 523.25, 659.25]; // C major 7th ethereal ambient swell
+    chords.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t + idx * 0.12);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 2.5);
+
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.exponentialRampToValueAtTime(0.12, t + idx * 0.15 + 0.8);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 3.2);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t + idx * 0.12);
+      osc.stop(t + 3.3);
+    });
   }
 }
 

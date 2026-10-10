@@ -10,11 +10,11 @@
   const CANVAS_LOGICAL_WIDTH = 420;
   const CANVAS_LOGICAL_HEIGHT = 650;
   const GRAVITY = 0; // Top-down frictionless ricochet plane
-  const DAMPING = 0.994; // Gentle air drag for elegant deceleration
+  const DAMPING = 0.9985; // High-energy frictionless arcade flight so orbs never stall mid-air
   const ORB_RADIUS = 13;
   const MAX_DRAG_DIST = 110;
   const LAUNCH_SPEED_FACTOR = 0.22;
-  const MIN_SPEED_THRESHOLD = 0.35;
+  const MIN_SPEED_THRESHOLD = 0.25;
 
   // Color Definitions
   const COLORS = {
@@ -28,9 +28,9 @@
   // Available Skins
   const SKINS = [
     { id: 'neon', name_ar: 'أطياف النيون الأصلية', name_en: 'Classic Neon Spirits', desc_ar: 'السماوي والوردي الكلاسيكي', desc_en: 'Classic cyan & magenta duo', cyan: '#00f3ff', magenta: '#ff007f', cost: 0 },
-    { id: 'aurora', name_ar: 'شفق الفضاء الزمردي', name_en: 'Emerald Space Aurora', desc_ar: 'الزمردي ولهب المرجان', desc_en: 'Vibrant emerald & coral blaze', cyan: '#06d6a0', magenta: '#ff5400', cost: 150 },
-    { id: 'celestial', name_ar: 'السديم الملكي', name_en: 'Celestial Royalty', desc_ar: 'البنفسجي والذهب الشمسي', desc_en: 'Royal purple & solar gold', cyan: '#7209b7', magenta: '#ffb703', cost: 300 },
-    { id: 'supernova', name_ar: 'شمس السوبرنوفا', name_en: 'Supernova Flare', desc_ar: 'اللهب الشمسي والأرجواني الكوني', desc_en: 'Solar flares & cosmic crimson', cyan: '#ff7700', magenta: '#d90429', cost: 450 }
+    { id: 'aurora', name_ar: 'شفق الفضاء الزمردي', name_en: 'Emerald Space Aurora', desc_ar: 'الزمردي ولهب المرجان', desc_en: 'Vibrant emerald & coral blaze', cyan: '#06d6a0', magenta: '#ff5400', cost: 80 },
+    { id: 'celestial', name_ar: 'السديم الملكي', name_en: 'Celestial Royalty', desc_ar: 'البنفسجي والذهب الشمسي', desc_en: 'Royal purple & solar gold', cyan: '#7209b7', magenta: '#ffb703', cost: 180 },
+    { id: 'supernova', name_ar: 'شمس السوبرنوفا', name_en: 'Supernova Flare', desc_ar: 'اللهب الشمسي والأرجواني الكوني', desc_en: 'Solar flares & cosmic crimson', cyan: '#ff7700', magenta: '#d90429', cost: 320 }
   ];
 
   // --- State ---
@@ -52,7 +52,7 @@
     savedProgress: {
       completedLevels: {},
       highScore: 0,
-      gems: 50, // Welcome gift 50 gems
+      gems: 15, // Welcome gift 15 gems
       unlockedSkins: ['neon'],
       unlockedAchievements: [],
       stats: {
@@ -68,17 +68,55 @@
     finalSlowMoTriggered: false
   };
 
-  // Achievements Definition with Targets and Rewards
+  // Achievements Definition with Targets and Rewards (34 Tiered Badges)
   const ACHIEVEMENTS = [
-    { id: 'first_gem', icon: '💎', title_ar: 'بريق الأطياف', title_en: 'Spirit Gleam', desc_ar: 'جمع 50 جوهرة نيونية', desc_en: 'Collect 50 neon gems', target: 50, reward: 50, type: 'gems' },
-    { id: 'ad_supporter', icon: '🎁', title_ar: 'حليف الأطياف', title_en: 'Spirit Ally', desc_ar: 'مشاهدة إعلان مكافأة ودعم اللعبة', desc_en: 'Watch a rewarded ad to support the game', target: 1, reward: 100, type: 'ads' },
-    { id: 'first_shot', icon: '🎯', title_ar: 'قناص الأطياف', title_en: 'One-Shot Ace', desc_ar: 'إنهاء مرحلة بضربة واحدة فقط', desc_en: 'Clear a stage with a single shot', target: 1, reward: 50, type: 'oneshot' },
-    { id: 'combo_master', icon: '⚡', title_ar: 'سيد الكومبو', title_en: 'Combo Master', desc_ar: 'تحقيق كومبو x3 أو أكثر', desc_en: 'Reach a combo of x3 or higher', target: 3, reward: 50, type: 'combo' },
-    { id: 'crystal_hunter', icon: '💠', title_ar: 'صائد البلورات', title_en: 'Crystal Hunter', desc_ar: 'سحق 30 بلورة نيونية', desc_en: 'Shatter 30 neon crystals', target: 30, reward: 60, type: 'crystals' },
-    { id: 'portal_traveler', icon: '🌀', title_ar: 'مسافر الأبعاد', title_en: 'Wormhole Traveler', desc_ar: 'استخدام بوابات الانتقال الفضائي 3 مرات', desc_en: 'Traverse cosmic portals 3 times', target: 3, reward: 50, type: 'portals' },
-    { id: 'stars_collector', icon: '🌟', title_ar: 'جامع النجوم', title_en: 'Star Collector', desc_ar: 'جمع 15 نجمة أو أكثر في المراحل', desc_en: 'Collect 15 or more stage stars', target: 15, reward: 80, type: 'stars' },
-    { id: 'skin_collector', icon: '🎨', title_ar: 'أناقة النيون', title_en: 'Neon Elegance', desc_ar: 'فتح مظهر نيون جديد للأرواح', desc_en: 'Unlock a new spirit skin', target: 2, reward: 70, type: 'skins' },
-    { id: 'harmony_master', icon: '👑', title_ar: 'سيد المجرات', title_en: 'Galaxy Master', desc_ar: 'بلوغ المرحلة 10 وإنهاء العالم الأول', desc_en: 'Conquer Stage 10 and clear World 1', target: 10, reward: 100, type: 'level' }
+    // 1-4: Precision One-Shot Series
+    { id: 'first_shot', icon: '🎯', title_ar: 'قناص الأطياف', title_en: 'One-Shot Ace', desc_ar: 'إنهاء مرحلة بضربة واحدة فقط', desc_en: 'Clear a stage with a single shot', target: 1, reward: 15, type: 'oneshot' },
+    { id: 'five_aces', icon: '🏹', title_ar: 'أسطورة القناصة', title_en: 'Ace Virtuoso', desc_ar: 'إنهاء 5 مراحل بضربة واحدة لكل منها', desc_en: 'Clear 5 stages with a single shot each', target: 5, reward: 25, type: 'oneshot' },
+    { id: 'ten_aces', icon: '⚡', title_ar: 'رامي النجوم الخارق', title_en: 'Deadeye Marksman', desc_ar: 'إنهاء 10 مراحل بضربة واحدة لكل منها', desc_en: 'Clear 10 stages with a single shot each', target: 10, reward: 40, type: 'oneshot' },
+    { id: 'twenty_aces', icon: '👁️', title_ar: 'عبقري الزوايا الكونية', title_en: 'Cosmic Geometric Prodigy', desc_ar: 'إنهاء 20 مرحلة بضربة واحدة استثنائية', desc_en: 'Clear 20 stages with a surgical one-shot each', target: 20, reward: 75, type: 'oneshot' },
+
+    // 5-8: Combos & Resonance Fever Series
+    { id: 'combo_master', icon: '⚡', title_ar: 'سيد الكومبو', title_en: 'Combo Master', desc_ar: 'تحقيق كومبو x3 أو أكثر في رمية واحدة', desc_en: 'Reach a combo of x3 or higher in a shot', target: 3, reward: 15, type: 'combo' },
+    { id: 'fever_king', icon: '🔥', title_ar: 'حمى الرنين الخارق', title_en: 'Resonance Fever King', desc_ar: 'تحقيق كومبو خماسي x5 مذهل', desc_en: 'Unleash a breathtaking 5x combo', target: 5, reward: 30, type: 'combo' },
+    { id: 'hyper_combo', icon: '🌪️', title_ar: 'إعصار السلسلة النيونية', title_en: 'Hyper Combo Storm', desc_ar: 'تحقيق كومبو ثماني x8 أسطوري في رمية واحدة', desc_en: 'Unleash a legendary x8 combo storm', target: 8, reward: 50, type: 'combo' },
+    { id: 'combo_zen', icon: '🧘', title_ar: 'إيقاع التناغم الأبدي', title_en: 'Harmonic Zen Master', desc_ar: 'تفعيل طور حمى الرنين الكوني 5 مرات', desc_en: 'Trigger Resonance Fever 5 times', target: 5, reward: 40, type: 'fever' },
+
+    // 9-13: Crystal Demolition & Explosions
+    { id: 'crystal_hunter', icon: '💠', title_ar: 'صائد البلورات', title_en: 'Crystal Hunter', desc_ar: 'سحق 30 بلورة نيونية في رحلتك', desc_en: 'Shatter 30 neon crystals', target: 30, reward: 15, type: 'crystals' },
+    { id: 'crystal_demolisher', icon: '💥', title_ar: 'مدمر البلورات', title_en: 'Crystal Demolisher', desc_ar: 'سحق 100 بلورة نيونية في رحلتك', desc_en: 'Shatter 100 neon crystals', target: 100, reward: 30, type: 'crystals' },
+    { id: 'crystal_obliteration', icon: '☄️', title_ar: 'محطم المجرات', title_en: 'Galaxy Shatterer', desc_ar: 'سحق 300 بلورة نيونية عبر العوالم', desc_en: 'Shatter 300 neon crystals across worlds', target: 300, reward: 50, type: 'crystals' },
+    { id: 'crystal_colossus', icon: '🗿', title_ar: 'أسطورة التطهير الكوني', title_en: 'Cosmic Oblivion Titan', desc_ar: 'سحق 800 بلورة نيونية لإثبات السيادة', desc_en: 'Shatter 800 neon crystals in total campaign', target: 800, reward: 100, type: 'crystals' },
+    { id: 'bomb_specialist', icon: '💣', title_ar: 'خبير التفجير المتسلسل', title_en: 'Chain Bomb Specialist', desc_ar: 'تفجير 25 بلورة متفجرات نيونية', desc_en: 'Detonate 25 bomb crystals', target: 25, reward: 40, type: 'bombs' },
+
+    // 14-19: Physics & Interactive Mechanics
+    { id: 'portal_traveler', icon: '🌀', title_ar: 'مسافر الأبعاد', title_en: 'Wormhole Traveler', desc_ar: 'استخدام بوابات الانتقال الفضائي 5 مرات', desc_en: 'Traverse cosmic wormholes 5 times', target: 5, reward: 20, type: 'portals' },
+    { id: 'hyper_jumper', icon: '🌌', title_ar: 'القفز الفضائي الفائق', title_en: 'Hyper Spatial Jumper', desc_ar: 'استخدام بوابات الانتقال الفضائي 30 مرة', desc_en: 'Traverse cosmic wormholes 30 times', target: 30, reward: 50, type: 'portals' },
+    { id: 'gravity_rider', icon: '🪐', title_ar: 'مروّض الجاذبية', title_en: 'Gravity Slingshot', desc_ar: 'الانعطاف حول حقول الجاذبية 10 مرات', desc_en: 'Slingshot through gravity wells 10 times', target: 10, reward: 25, type: 'gravity' },
+    { id: 'gravity_master', icon: '🕳️', title_ar: 'سيد الثقوب الكونية', title_en: 'Singularity Grandmaster', desc_ar: 'الانعطاف حول حقول الجاذبية 40 مرة', desc_en: 'Slingshot through gravity wells 40 times', target: 40, reward: 60, type: 'gravity' },
+    { id: 'prism_weaver', icon: '🔮', title_ar: 'ناسج أطياف الضوء', title_en: 'Prism Lightweaver', desc_ar: 'عبور المناشير لتحويل الأطياف 25 مرة', desc_en: 'Weave spirit light through prisms 25 times', target: 25, reward: 35, type: 'prisms' },
+    { id: 'laser_hacker', icon: '🔓', title_ar: 'كاسر حواجز الليزر', title_en: 'Laser Cryptobreaker', desc_ar: 'تعطيل 15 بوابة ليزر عبر مفاتيح الأمان', desc_en: 'Disable 15 laser gates using security terminals', target: 15, reward: 35, type: 'lasers' },
+
+    // 20-24: Stars & Completion Series
+    { id: 'stars_collector', icon: '🌟', title_ar: 'جامع النجوم', title_en: 'Star Collector', desc_ar: 'جمع 15 نجمة أو أكثر في المراحل', desc_en: 'Collect 15 or more stage stars', target: 15, reward: 20, type: 'stars' },
+    { id: 'stars_champion', icon: '✨', title_ar: 'بطل النجوم الكوني', title_en: 'Star Champion', desc_ar: 'جمع 40 نجمة في حملة العوالم', desc_en: 'Collect 40 stars across campaign worlds', target: 40, reward: 35, type: 'stars' },
+    { id: 'stars_master', icon: '🌠', title_ar: 'سيد المجرات', title_en: 'Galaxy Star Master', desc_ar: 'جمع 80 نجمة ذهبية في حملة العوالم', desc_en: 'Collect 80 stars across campaign worlds', target: 80, reward: 55, type: 'stars' },
+    { id: 'stars_legend', icon: '👑', title_ar: 'الكمال الكوني', title_en: 'Cosmic Perfection', desc_ar: 'جمع 120 نجمة متألقة في المراحل', desc_en: 'Achieve 120 sparkling stars in campaign', target: 120, reward: 80, type: 'stars' },
+    { id: 'stars_ultimate', icon: '🏆', title_ar: 'تاج الـ 150 نجمة الملكي', title_en: 'The Royal 150-Star Crown', desc_ar: 'تحقيق الدرجة الكاملة (3 نجوم في جميع الـ 50 مرحلة!)', desc_en: 'Achieve flawless 3 stars on all 50 campaign stages!', target: 150, reward: 150, type: 'stars' },
+
+    // 25-29: Worlds Conquest Series
+    { id: 'conqueror_w1', icon: '🪐', title_ar: 'فاتح سديم النيون', title_en: 'Nebula Genesis Conqueror', desc_ar: 'إنهاء المرحلة 10 وتطهير العالم الأول', desc_en: 'Conquer Stage 10 and clear World 1', target: 10, reward: 25, type: 'world' },
+    { id: 'conqueror_w2', icon: '🔮', title_ar: 'سيد بوابات الأثير', title_en: 'Prisms & Portals Master', desc_ar: 'إنهاء المرحلة 20 وتطهير العالم الثاني', desc_en: 'Conquer Stage 20 and clear World 2', target: 20, reward: 35, type: 'world' },
+    { id: 'conqueror_w3', icon: '⚡', title_ar: 'قاهر الفوضى الحركية', title_en: 'Kinetic Chaos Overlord', desc_ar: 'إنهاء المرحلة 30 وتطهير العالم الثالث', desc_en: 'Conquer Stage 30 and clear World 3', target: 30, reward: 45, type: 'world' },
+    { id: 'conqueror_w4', icon: '🌌', title_ar: 'قاهر الجاذبية الكونية', title_en: 'Gravity Wells Conqueror', desc_ar: 'إنهاء المرحلة 40 وتطهير العالم الرابع', desc_en: 'Conquer Stage 40 and clear World 4', target: 40, reward: 60, type: 'world' },
+    { id: 'conqueror_w5', icon: '👑', title_ar: 'أسطورة قمة المجرة الأبدية', title_en: 'Celestial Apex Paragon', desc_ar: 'إنهاء المرحلة 50 وختم حملة العوالم الكبرى!', desc_en: 'Conquer Stage 50 and achieve Grand Campaign Completion!', target: 50, reward: 120, type: 'world' },
+
+    // 30-34: Economy & Skins Series
+    { id: 'first_gem', icon: '💎', title_ar: 'بريق الأطياف', title_en: 'Spirit Gleam', desc_ar: 'جمع 50 جوهرة نيونية', desc_en: 'Collect 50 neon gems', target: 50, reward: 20, type: 'gems' },
+    { id: 'gem_tycoon', icon: '💰', title_ar: 'خازن الجواهر الملكية', title_en: 'Royal Gem Tycoon', desc_ar: 'تجميع 200 جوهرة نيونية في رصيدك', desc_en: 'Amass a treasury of 200 neon gems', target: 200, reward: 60, type: 'gems' },
+    { id: 'ad_supporter', icon: '🎁', title_ar: 'حليف الأطياف المخلص', title_en: 'Loyal Spirit Ally', desc_ar: 'مشاهدة 3 إعلانات مكافأة ودعم اللعبة', desc_en: 'Watch 3 rewarded ads to support the game', target: 3, reward: 35, type: 'ads' },
+    { id: 'skin_collector', icon: '🎨', title_ar: 'أناقة النيون', title_en: 'Neon Elegance', desc_ar: 'فتح 2 من مظاهر الأطياف النيونية', desc_en: 'Unlock 2 spirit skins', target: 2, reward: 25, type: 'skins' },
+    { id: 'skin_fashionista', icon: '✨', title_ar: 'خزانة المجرة الكاملة', title_en: 'Universal Wardrobe', desc_ar: 'فتح جميع المظاهر الأربعة للأرواح', desc_en: 'Unlock all 4 cosmic spirit skins', target: 4, reward: 75, type: 'skins' }
   ];
 
   // --- Entities Arrays ---
@@ -94,6 +132,8 @@
   let gravityWells = [];
   let switches = [];
   let laserGates = [];
+  let bumpers = [];
+  let glassWalls = [];
 
   // Drag / Slinging State
   const drag = {
@@ -151,10 +191,28 @@
         if (parsed.activeSkin) state.activeSkin = parsed.activeSkin;
       }
       if (state.savedProgress.gems === undefined) {
-        state.savedProgress.gems = 50; // Welcome reward
+        state.savedProgress.gems = 15; // Welcome reward
       }
       if (!state.savedProgress.stats) {
-        state.savedProgress.stats = { totalCrystalsBroken: 0, portalsUsed: 0, adsWatched: 0 };
+        state.savedProgress.stats = {
+          totalCrystalsBroken: 0,
+          portalsUsed: 0,
+          adsWatched: 0,
+          oneShotsCount: 0,
+          gravityUsed: 0,
+          prismsUsed: 0,
+          bombsDetonated: 0,
+          lasersDisabled: 0,
+          feverCount: 0
+        };
+      } else {
+        // Guarantee backwards compatibility for all tracked metrics
+        state.savedProgress.stats.oneShotsCount = state.savedProgress.stats.oneShotsCount || 0;
+        state.savedProgress.stats.gravityUsed = state.savedProgress.stats.gravityUsed || 0;
+        state.savedProgress.stats.prismsUsed = state.savedProgress.stats.prismsUsed || 0;
+        state.savedProgress.stats.bombsDetonated = state.savedProgress.stats.bombsDetonated || 0;
+        state.savedProgress.stats.lasersDisabled = state.savedProgress.stats.lasersDisabled || 0;
+        state.savedProgress.stats.feverCount = state.savedProgress.stats.feverCount || 0;
       }
       if (!state.savedProgress.unlockedSkins) {
         state.savedProgress.unlockedSkins = ['neon'];
@@ -193,6 +251,9 @@
     if (state.savedProgress.gems >= 50) {
       checkUnlockAchievement('first_gem');
     }
+    if (state.savedProgress.gems >= 200) {
+      checkUnlockAchievement('gem_tycoon');
+    }
   }
 
   // --- Universal Rewarded Video Ad Service (Browser & iOS Ready) ---
@@ -218,7 +279,9 @@
 
         state.savedProgress.stats.adsWatched = (state.savedProgress.stats.adsWatched || 0) + 1;
         saveStorage();
-        checkUnlockAchievement('ad_supporter');
+        if (state.savedProgress.stats.adsWatched >= 3) {
+          checkUnlockAchievement('ad_supporter');
+        }
 
         if (window.soundEngine.playAchievement) window.soundEngine.playAchievement();
         triggerHaptic('heavy');
@@ -339,12 +402,15 @@
   }
 
   function addFloatingText(text, x, y, color = '#ffb703') {
+    if (floatingTexts.length > 7) {
+      floatingTexts.shift();
+    }
     floatingTexts.push({
       text: text,
       x: x,
       y: y,
       alpha: 1,
-      vy: -1.4,
+      vy: -1.7,
       color: color
     });
   }
@@ -374,6 +440,8 @@
     gravityWells = [];
     switches = [];
     laserGates = [];
+    bumpers = [];
+    glassWalls = [];
 
     // Populate level entities
     state.levelData.elements.forEach(item => {
@@ -397,6 +465,25 @@
           width: item.width * CANVAS_LOGICAL_WIDTH,
           height: item.height * CANVAS_LOGICAL_HEIGHT,
           angle: item.angle || 0
+        });
+      } else if (item.type === 'bumper') {
+        bumpers.push({
+          x: item.x * CANVAS_LOGICAL_WIDTH,
+          y: item.y * CANVAS_LOGICAL_HEIGHT,
+          radius: item.radius || 24,
+          color: item.color || '#ff007f',
+          pulse: 0
+        });
+      } else if (item.type === 'glassWall') {
+        glassWalls.push({
+          x: item.x * CANVAS_LOGICAL_WIDTH,
+          y: item.y * CANVAS_LOGICAL_HEIGHT,
+          width: item.width * CANVAS_LOGICAL_WIDTH,
+          height: item.height * CANVAS_LOGICAL_HEIGHT,
+          angle: item.angle || 0,
+          hp: item.hp || 1,
+          maxHp: item.hp || 1,
+          shake: 0
         });
       } else if (item.type === 'prism') {
         prisms.push({
@@ -519,6 +606,9 @@
     state.shotsLeft--;
     state.currentCombo = 0;
     state.flightSafetyTimer = 0;
+    state.idleFlightTimer = 0;
+    state.fastForward = false;
+    state.timeScale = 1.0;
     updateHud();
     gestureHint.classList.add('hidden');
 
@@ -526,23 +616,29 @@
     triggerHaptic('medium');
     addTrauma(0.15);
 
-    // Launch Roya immediately
-    orbs[0].x = drag.anchorX;
-    orbs[0].y = drag.anchorY;
+    // Launch Roya & Arya together side-by-side in harmonious twin formation
+    const speed = Math.hypot(vx, vy) || 1;
+    const perpX = -vy / speed;
+    const perpY = vx / speed;
+    const separation = 14;
+
+    orbs[0].x = drag.anchorX + perpX * -separation;
+    orbs[0].y = drag.anchorY + perpY * -separation;
     orbs[0].vx = vx;
     orbs[0].vy = vy;
     orbs[0].active = true;
+    orbs[0].flightFrames = 0;
+    orbs[0].bounces = 0;
 
-    // Launch Arya with deterministic frame countdown (4 frames ~66ms)
     if (orbs[1]) {
-      orbs[1].x = drag.anchorX;
-      orbs[1].y = drag.anchorY;
-      const angle = Math.atan2(vy, vx) + (Math.PI / 36);
-      const speed = Math.hypot(vx, vy);
-      orbs[1].pendingVx = Math.cos(angle) * speed;
-      orbs[1].pendingVy = Math.sin(angle) * speed;
-      orbs[1].launchDelay = 4;
-      orbs[1].active = false;
+      orbs[1].x = drag.anchorX + perpX * separation;
+      orbs[1].y = drag.anchorY + perpY * separation;
+      orbs[1].vx = vx;
+      orbs[1].vy = vy;
+      orbs[1].active = true;
+      orbs[1].launchDelay = 0;
+      orbs[1].flightFrames = 0;
+      orbs[1].bounces = 0;
     }
   }
 
@@ -559,9 +655,15 @@
   function updatePhysics(dt) {
     if (state.gameState !== 'FLYING') return;
 
-    // Flight Safety Watchdog (prevents perpetual loops)
-    state.flightSafetyTimer = (state.flightSafetyTimer || 0) + (dt || 0.016);
-    if (state.flightSafetyTimer > 7.5) {
+    // Instant victory when all crystals cleared
+    if (crystals.length === 0) {
+      handleFlightEnd();
+      return;
+    }
+
+    // Natural energetic flight duration (~5.5 seconds of high-speed ricochets)
+    state.flightTimer = (state.flightTimer || 0) + (dt || 0.016);
+    if (state.flightTimer >= 5.5) {
       handleFlightEnd();
       return;
     }
@@ -618,7 +720,7 @@
       const o2 = orbs[1];
       const tetherDist = Math.hypot(o1.x - o2.x, o1.y - o2.y);
 
-      if (tetherDist < 190 && tetherDist > 15) {
+      if (tetherDist < 250 && tetherDist > 12) {
         state.resonanceActive = true;
 
         for (let c = crystals.length - 1; c >= 0; c--) {
@@ -647,13 +749,21 @@
     orbs.forEach(orb => {
       if (!orb.active) return;
 
-      // Update positions
-      orb.x += orb.vx;
-      orb.y += orb.vy;
+      orb.flightFrames = (orb.flightFrames || 0) + 1;
 
-      // Air resistance damping
-      orb.vx *= DAMPING;
-      orb.vy *= DAMPING;
+      // Update positions with dynamic timeScale
+      const stepScale = state.timeScale || 1.0;
+      orb.x += orb.vx * stepScale;
+      orb.y += orb.vy * stepScale;
+
+      // Gentle aerodynamic decay
+      orb.vx *= Math.pow(DAMPING, stepScale);
+      orb.vy *= Math.pow(DAMPING, stepScale);
+
+      // After 3.5s of rich active ricochets (~210 frames) or 10 bounces, gently bias downward toward collection floor
+      if (orb.flightFrames > 210 || (orb.bounces || 0) >= 10) {
+        orb.vy += 0.12 * stepScale;
+      }
 
       const speed = Math.hypot(orb.vx, orb.vy);
 
@@ -663,38 +773,52 @@
         y: orb.y,
         color: COLORS[orb.colorType] ? COLORS[orb.colorType].main : '#00f3ff'
       });
-      if (orb.trail.length > 18) orb.trail.shift();
+      if (orb.trail.length > 20) orb.trail.shift();
 
-      // Wall Boundary Collisions (Screen Edges)
+      // Wall Boundary Collisions (Screen Edges) - Clean, high-energy elastic bounces
       const padding = 14;
       // Left Wall
       if (orb.x - orb.radius <= padding) {
         orb.x = padding + orb.radius;
-        orb.vx = -orb.vx * 0.95;
+        if (orb.vx < 0) orb.vx = -orb.vx * 0.98;
+        orb.bounces = (orb.bounces || 0) + 1;
         onOrbBounce(orb);
       }
       // Right Wall
       if (orb.x + orb.radius >= CANVAS_LOGICAL_WIDTH - padding) {
         orb.x = CANVAS_LOGICAL_WIDTH - padding - orb.radius;
-        orb.vx = -orb.vx * 0.95;
+        if (orb.vx > 0) orb.vx = -orb.vx * 0.98;
+        orb.bounces = (orb.bounces || 0) + 1;
         onOrbBounce(orb);
       }
       // Top Wall
       if (orb.y - orb.radius <= 18) {
         orb.y = 18 + orb.radius;
-        orb.vy = -orb.vy * 0.95;
+        if (orb.vy < 0) orb.vy = -orb.vy * 0.98;
+        orb.bounces = (orb.bounces || 0) + 1;
         onOrbBounce(orb);
       }
-      // Bottom Launcher Wall (Bounces back into arena, doesn't kill)
+      // Bottom Arena Wall (Bounces back into arena with high kinetic energy)
       if (orb.y + orb.radius >= CANVAS_LOGICAL_HEIGHT - 30) {
         orb.y = CANVAS_LOGICAL_HEIGHT - 30 - orb.radius;
-        orb.vy = -orb.vy * 0.9;
+        if (orb.vy > 0) orb.vy = -orb.vy * 0.96;
+        orb.bounces = (orb.bounces || 0) + 1;
         onOrbBounce(orb);
       }
 
       // Collisions with Level Rectangular Walls
       walls.forEach(wall => {
         resolveOrbWallCollision(orb, wall);
+      });
+
+      // Collisions with Destructible Glass Walls
+      for (let gw = glassWalls.length - 1; gw >= 0; gw--) {
+        resolveOrbGlassWallCollision(orb, glassWalls[gw], gw);
+      }
+
+      // Collisions with Kinetic Pinball Bumpers
+      bumpers.forEach(bumper => {
+        resolveOrbBumperCollision(orb, bumper);
       });
 
       // Collisions with Rotating Spinners
@@ -709,6 +833,10 @@
           // Transform color to synergy!
           if (orb.colorType !== prism.transformTo) {
             orb.colorType = prism.transformTo;
+            state.savedProgress.stats.prismsUsed = (state.savedProgress.stats.prismsUsed || 0) + 1;
+            if (state.savedProgress.stats.prismsUsed >= 25) {
+              checkUnlockAchievement('prism_weaver');
+            }
             createParticleBurst(prism.x, prism.y, COLORS.gold.main, 18);
             window.soundEngine.playHarmonicHit(state.currentCombo, 'prism');
             addFloatingText('SYNERGY!', prism.x, prism.y - 20, COLORS.gold.main);
@@ -743,8 +871,11 @@
             addFloatingText('WARP!', orb.x, orb.y - 20, portal.color);
 
             state.savedProgress.stats.portalsUsed = (state.savedProgress.stats.portalsUsed || 0) + 1;
-            if (state.savedProgress.stats.portalsUsed >= 3) {
+            if (state.savedProgress.stats.portalsUsed >= 5) {
               checkUnlockAchievement('portal_traveler');
+            }
+            if (state.savedProgress.stats.portalsUsed >= 30) {
+              checkUnlockAchievement('hyper_jumper');
             }
             saveStorage();
             break;
@@ -765,6 +896,17 @@
           const dir = well.mode === 'pull' ? 1 : -1;
           orb.vx += (gdx / gdist) * force * dir;
           orb.vy += (gdy / gdist) * force * dir;
+
+          if (gdist < effectRadius * 0.7 && orb.lastGravityId !== well) {
+            orb.lastGravityId = well;
+            state.savedProgress.stats.gravityUsed = (state.savedProgress.stats.gravityUsed || 0) + 1;
+            if (state.savedProgress.stats.gravityUsed >= 10) {
+              checkUnlockAchievement('gravity_rider');
+            }
+            if (state.savedProgress.stats.gravityUsed >= 40) {
+              checkUnlockAchievement('gravity_master');
+            }
+          }
         }
       });
 
@@ -774,6 +916,10 @@
         const swDist = Math.hypot(orb.x - sw.x, orb.y - sw.y);
         if (swDist < orb.radius + sw.radius) {
           sw.activated = true;
+          state.savedProgress.stats.lasersDisabled = (state.savedProgress.stats.lasersDisabled || 0) + 1;
+          if (state.savedProgress.stats.lasersDisabled >= 15) {
+            checkUnlockAchievement('laser_hacker');
+          }
           laserGates.forEach(g => {
             if (g.id === sw.gateId) g.active = false;
           });
@@ -805,8 +951,10 @@
           const nx = -gy / glen;
           const ny = gx / glen;
           const dot = orb.vx * nx + orb.vy * ny;
-          orb.vx -= 1.9 * dot * nx;
-          orb.vy -= 1.9 * dot * ny;
+          if (dot < 0) {
+            orb.vx -= 1.85 * dot * nx;
+            orb.vy -= 1.85 * dot * ny;
+          }
           createParticleBurst(orb.x, orb.y, gate.color, 12);
           onOrbBounce(orb);
           addFloatingText('⚡ BLOCKED!', orb.x, orb.y - 15, gate.color);
@@ -819,13 +967,21 @@
         const dist = Math.hypot(orb.x - crystal.x, orb.y - crystal.y);
 
         if (dist < orb.radius + crystal.radius) {
-          // Normal reflection vector
-          const nx = (orb.x - crystal.x) / dist;
-          const ny = (orb.y - crystal.y) / dist;
+          // Normal reflection vector pointing from crystal to orb
+          const nx = (orb.x - crystal.x) / (dist || 1);
+          const ny = (orb.y - crystal.y) / (dist || 1);
           const dot = orb.vx * nx + orb.vy * ny;
 
-          orb.vx -= 1.9 * dot * nx;
-          orb.vy -= 1.9 * dot * ny;
+          if (dot < 0) {
+            orb.vx -= 1.85 * dot * nx;
+            orb.vy -= 1.85 * dot * ny;
+          }
+
+          // Displace orb outside crystal collider to prevent sticking!
+          const overlap = (orb.radius + crystal.radius) - dist;
+          orb.x += nx * (overlap + 2.5);
+          orb.y += ny * (overlap + 2.5);
+          orb.bounces = (orb.bounces || 0) + 1;
 
           // Color Match Check:
           // Synergy orb hits anything. Cyan hits cyan. Magenta hits magenta.
@@ -838,23 +994,28 @@
           } else {
             // Non-matching bounce: subtle ping sound, slight deflecting trauma
             window.soundEngine.playBounce();
-            addFloatingText('طيف غير مطابق!', crystal.x, crystal.y - 15, '#888');
+            // Debounce mismatch text: max once per 1.2s per crystal to eliminate lag
+            const now = Date.now();
+            if (!crystal.lastMismatchText || (now - crystal.lastMismatchText) > 1200) {
+              crystal.lastMismatchText = now;
+              addFloatingText('طيف غير مطابق!', crystal.x, crystal.y - 18, '#ff99aa');
+            }
           }
           break;
         }
       }
 
-      // Check if orb has settled down
-      if (speed > MIN_SPEED_THRESHOLD) {
-        allStopped = false;
-      } else {
+      // Settle orb if velocity exhausts
+      const curSpeed = Math.hypot(orb.vx, orb.vy);
+      if (curSpeed <= MIN_SPEED_THRESHOLD) {
         orb.vx = 0;
         orb.vy = 0;
       }
     });
 
-    // Check Flight Completion
-    if (allStopped) {
+    // Check Flight Completion: Concludes when all orbs have settled or all crystals cleared
+    const allSettled = orbs.every(o => !o.active || (Math.hypot(o.vx, o.vy) <= MIN_SPEED_THRESHOLD));
+    if (allSettled || crystals.length === 0) {
       handleFlightEnd();
     }
   }
@@ -876,12 +1037,15 @@
       const overlapY = (halfH + orb.radius) - Math.abs(dy);
 
       if (overlapX < overlapY) {
-        orb.vx = -orb.vx * 0.95;
+        if (dx > 0 && orb.vx < 0) orb.vx = -orb.vx * 0.98;
+        else if (dx < 0 && orb.vx > 0) orb.vx = -orb.vx * 0.98;
         orb.x += dx > 0 ? overlapX : -overlapX;
       } else {
-        orb.vy = -orb.vy * 0.95;
+        if (dy > 0 && orb.vy < 0) orb.vy = -orb.vy * 0.98;
+        else if (dy < 0 && orb.vy > 0) orb.vy = -orb.vy * 0.98;
         orb.y += dy > 0 ? overlapY : -overlapY;
       }
+      orb.bounces = (orb.bounces || 0) + 1;
       onOrbBounce(orb);
     }
   }
@@ -922,7 +1086,92 @@
     }
   }
 
+  function resolveOrbBumperCollision(orb, bumper) {
+    const dx = orb.x - bumper.x;
+    const dy = orb.y - bumper.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < orb.radius + bumper.radius) {
+      const nx = dx / (dist || 1);
+      const ny = dy / (dist || 1);
+      orb.x = bumper.x + nx * (orb.radius + bumper.radius + 3);
+      orb.y = bumper.y + ny * (orb.radius + bumper.radius + 3);
+
+      // High-energy kinetic booster kick
+      const curSpeed = Math.hypot(orb.vx, orb.vy);
+      const kickSpeed = Math.max(curSpeed * 1.35, 11);
+      orb.vx = nx * kickSpeed;
+      orb.vy = ny * kickSpeed;
+      bumper.pulse = 1.0;
+      state.idleFlightTimer = 0;
+
+      createParticleBurst(bumper.x, bumper.y, bumper.color || '#ff007f', 20);
+      shockwaves.push({
+        x: bumper.x,
+        y: bumper.y,
+        radius: bumper.radius,
+        maxRadius: bumper.radius + 45,
+        color: bumper.color || '#ff007f',
+        alpha: 0.95
+      });
+      addFloatingText('⚡ BUMP!', bumper.x, bumper.y - 18, bumper.color || '#ff007f');
+      if (window.soundEngine.playBumperHit) window.soundEngine.playBumperHit();
+      triggerHaptic('heavy');
+      addTrauma(0.18);
+    }
+  }
+
+  function resolveOrbGlassWallCollision(orb, wall, wallIndex) {
+    const halfW = wall.width / 2;
+    const halfH = wall.height / 2;
+    const dx = orb.x - wall.x;
+    const dy = orb.y - wall.y;
+
+    if (Math.abs(dx) < halfW + orb.radius && Math.abs(dy) < halfH + orb.radius) {
+      const overlapX = (halfW + orb.radius) - Math.abs(dx);
+      const overlapY = (halfH + orb.radius) - Math.abs(dy);
+
+      if (overlapX < overlapY) {
+        orb.vx = -orb.vx * 0.95;
+        orb.x += dx > 0 ? overlapX : -overlapX;
+      } else {
+        orb.vy = -orb.vy * 0.95;
+        orb.y += dy > 0 ? overlapY : -overlapY;
+      }
+
+      wall.hp--;
+      wall.shake = 10;
+      state.idleFlightTimer = 0;
+      createParticleBurst(orb.x, orb.y, '#00f3ff', 12);
+
+      if (wall.hp <= 0) {
+        createParticleBurst(wall.x, wall.y, '#00f3ff', 32);
+        createParticleBurst(wall.x, wall.y, '#ffffff', 20);
+        shockwaves.push({
+          x: wall.x,
+          y: wall.y,
+          radius: 10,
+          maxRadius: Math.max(wall.width, wall.height) + 20,
+          color: '#00f3ff',
+          alpha: 0.95
+        });
+        addFloatingText('💎 SHATTERED!', wall.x, wall.y - 18, '#00f3ff');
+        if (window.soundEngine.playGlassShatter) window.soundEngine.playGlassShatter();
+        triggerHaptic('heavy');
+        addTrauma(0.24);
+        glassWalls.splice(wallIndex, 1);
+      } else {
+        addFloatingText('⚡ CRACK!', orb.x, orb.y - 15, '#88eeff');
+        window.soundEngine.playBounce();
+        triggerHaptic('medium');
+        addTrauma(0.08);
+      }
+    }
+  }
+
   function damageCrystal(crystal, index, orb) {
+    if (!crystal || crystal.isDestroyed) return;
+    state.idleFlightTimer = 0;
+
     // Energy Shield Absorbs Hit
     if (crystal.hasShield) {
       crystal.hasShield = false;
@@ -973,17 +1222,10 @@
         color: COLORS.magenta.main,
         alpha: 0.95
       });
-      // Splash damage to neighboring crystals within 65px
-      crystals.forEach((adj, adjIdx) => {
-        if (adj !== crystal && Math.hypot(adj.x - crystal.x, adj.y - crystal.y) < 65) {
-          adj.hp--;
-          createParticleBurst(adj.x, adj.y, COLORS.magenta.main, 10);
-          addFloatingText('💥 SPLASH!', adj.x, adj.y - 12, COLORS.magenta.main);
-          if (adj.hp <= 0) {
-            crystals.splice(adjIdx, 1);
-            addGems(1, false);
-          }
-        }
+      // Splash damage to neighboring crystals within 65px (gather first to avoid mutating array)
+      const splashTargets = crystals.filter(adj => adj !== crystal && !adj.isDestroyed && Math.hypot(adj.x - crystal.x, adj.y - crystal.y) < 65);
+      splashTargets.forEach(adj => {
+        damageCrystal(adj, crystals.indexOf(adj), { id: 'splash', colorType: 'synergy' });
       });
     }
 
@@ -1004,10 +1246,25 @@
     if (state.currentCombo >= 3) {
       checkUnlockAchievement('combo_master');
     }
+    if (state.currentCombo >= 5) {
+      checkUnlockAchievement('fever_king');
+    }
+    if (state.currentCombo >= 8) {
+      checkUnlockAchievement('hyper_combo');
+    }
 
     state.savedProgress.stats.totalCrystalsBroken = (state.savedProgress.stats.totalCrystalsBroken || 0) + 1;
     if (state.savedProgress.stats.totalCrystalsBroken >= 30) {
       checkUnlockAchievement('crystal_hunter');
+    }
+    if (state.savedProgress.stats.totalCrystalsBroken >= 100) {
+      checkUnlockAchievement('crystal_demolisher');
+    }
+    if (state.savedProgress.stats.totalCrystalsBroken >= 300) {
+      checkUnlockAchievement('crystal_obliteration');
+    }
+    if (state.savedProgress.stats.totalCrystalsBroken >= 800) {
+      checkUnlockAchievement('crystal_colossus');
     }
 
     // Final crystal epic cinematic shatter
@@ -1039,8 +1296,18 @@
     }
 
     if (crystal.hp <= 0) {
+      crystal.isDestroyed = true;
+      const cIndex = crystals.indexOf(crystal);
+      if (cIndex !== -1) {
+        crystals.splice(cIndex, 1);
+      }
+
       // Volatile Bomb Chain Reaction Blast
       if (crystal.subType === 'bomb') {
+        state.savedProgress.stats.bombsDetonated = (state.savedProgress.stats.bombsDetonated || 0) + 1;
+        if (state.savedProgress.stats.bombsDetonated >= 25) {
+          checkUnlockAchievement('bomb_specialist');
+        }
         addTrauma(0.38);
         triggerHitFlash(0.65, '#ff7700');
         shockwaves.push({
@@ -1056,24 +1323,22 @@
         addFloatingText('💣 BOOM!', crystal.x, crystal.y - 28, '#ff7700');
         if (window.soundEngine.playBombExplode) window.soundEngine.playBombExplode();
 
-        // Damage all nearby crystals within 110px
-        for (let c = crystals.length - 1; c >= 0; c--) {
-          const other = crystals[c];
-          if (other !== crystal) {
-            const bd = Math.hypot(other.x - crystal.x, other.y - crystal.y);
-            if (bd < 110) {
-              damageCrystal(other, c, { id: 'bomb', colorType: 'synergy' });
-            }
-          }
-        }
+        // Damage all nearby crystals within 110px (safe filtered copy)
+        const nearby = crystals.filter(other => !other.isDestroyed && Math.hypot(other.x - crystal.x, other.y - crystal.y) < 110);
+        nearby.forEach(other => {
+          damageCrystal(other, crystals.indexOf(other), { id: 'bomb', colorType: 'synergy' });
+        });
       }
 
       createParticleBurst(crystal.x, crystal.y, COLORS[crystal.color].main, 28);
       addFloatingText(`+${pts}`, crystal.x, crystal.y - 20, COLORS[crystal.color].main);
-      // Award +2 Gems for every shattered crystal
-      addGems(2, false);
-      addFloatingText('+2 💎', crystal.x, crystal.y - 38, '#ffb703');
-      crystals.splice(index, 1);
+
+      // Instant turn conclusion & victory when all crystals are cleared
+      if (crystals.length === 0) {
+        setTimeout(() => {
+          handleFlightEnd();
+        }, 320);
+      }
     } else {
       createParticleBurst(crystal.x, crystal.y, COLORS[crystal.color].main, 12);
       addFloatingText(`+${pts}`, crystal.x, crystal.y - 15, '#fff');
@@ -1081,6 +1346,12 @@
   }
 
   function handleFlightEnd() {
+    state.fastForward = false;
+    state.timeScale = 1.0;
+    state.flightSafetyTimer = 0;
+    state.idleFlightTimer = 0;
+    state.flightTimer = 0;
+
     orbs.forEach(o => {
       o.active = false;
       o.trail = [];
@@ -1140,6 +1411,96 @@
     populateAchievementsModal();
   }
 
+  // --- Star Milestone Chests & Cosmic Player Ranks ---
+  const STAR_CHESTS = [
+    { stars: 15, gems: 25, title_ar: "صندوق سديم النيون", title_en: "Neon Nebula Chest" },
+    { stars: 30, gems: 35, title_ar: "صندوق بوابات الأثير", title_en: "Aether Portal Chest" },
+    { stars: 60, gems: 50, title_ar: "صندوق الفوضى الحركية", title_en: "Kinetic Chaos Chest" },
+    { stars: 90, gems: 75, title_ar: "صندوق الجاذبية الكونية", title_en: "Gravitational Singularity Chest" },
+    { stars: 120, gems: 100, title_ar: "صندوق قمة المجرة الأسطورية", title_en: "Celestial Apex Sovereign Chest" }
+  ];
+
+  function getPlayerCosmicRank(totalStars) {
+    if (totalStars >= 130) {
+      return { name_ar: "أسطورة قمة المجرة الأبدية", name_en: "Celestial Apex Paragon", icon: "👑", badgeColor: "#06d6a0" };
+    } else if (totalStars >= 100) {
+      return { name_ar: "إمبراطور المجرات", name_en: "Cosmic Overlord", icon: "🌌", badgeColor: "#ff007f" };
+    } else if (totalStars >= 70) {
+      return { name_ar: "سيد البوابات الكونية", name_en: "Portal Grandmaster", icon: "🌀", badgeColor: "#ffb703" };
+    } else if (totalStars >= 40) {
+      return { name_ar: "فارس الرنين النيوني", name_en: "Resonance Knight", icon: "⚡", badgeColor: "#b537f2" };
+    } else if (totalStars >= 15) {
+      return { name_ar: "رماح النيون", name_en: "Neon Striker", icon: "✦", badgeColor: "#00f3ff" };
+    } else {
+      return { name_ar: "مبتدئ الأطياف", name_en: "Spirit Initiate", icon: "✨", badgeColor: "#8b95ad" };
+    }
+  }
+
+  function updateRankDisplay() {
+    const totalStars = Object.values(state.savedProgress.completedLevels || {}).reduce((a, b) => a + b, 0);
+    const rank = getPlayerCosmicRank(totalStars);
+    const isEn = window.i18n && window.i18n.getLang() === 'en';
+
+    const rankIcon = document.getElementById('rank-icon');
+    const rankTitle = document.getElementById('rank-title');
+    const rankStars = document.getElementById('rank-stars-count');
+
+    if (rankIcon) rankIcon.textContent = rank.icon;
+    if (rankTitle) {
+      rankTitle.textContent = isEn ? rank.name_en : rank.name_ar;
+      rankTitle.style.color = rank.badgeColor;
+    }
+    if (rankStars) rankStars.textContent = `⭐ ${totalStars}/150`;
+  }
+
+  function showNotificationToast(title, desc) {
+    const toast = document.getElementById('achievement-toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastDesc = document.getElementById('toast-desc');
+    if (toast && toastTitle && toastDesc) {
+      toastTitle.textContent = title;
+      toastDesc.textContent = desc;
+      toast.classList.remove('hidden');
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3800);
+    }
+  }
+
+  function checkStarChests(totalStars) {
+    if (!state.savedProgress.starChestsClaimed) {
+      state.savedProgress.starChestsClaimed = [];
+    }
+    STAR_CHESTS.forEach(chest => {
+      if (totalStars >= chest.stars && !state.savedProgress.starChestsClaimed.includes(chest.stars)) {
+        state.savedProgress.starChestsClaimed.push(chest.stars);
+        addGems(chest.gems, false);
+        const isEn = window.i18n && window.i18n.getLang() === 'en';
+        showNotificationToast(
+          `🎁 ${isEn ? chest.title_en : chest.title_ar}`,
+          `${isEn ? 'Star Milestone Chest Unlocked!' : 'صندوق معالم النجوم مفتوح!'} (+${chest.gems} 💎)`
+        );
+      }
+    });
+  }
+
+  function triggerResonanceFever() {
+    state.savedProgress.stats.feverCount = (state.savedProgress.stats.feverCount || 0) + 1;
+    if (state.savedProgress.stats.feverCount >= 5) {
+      checkUnlockAchievement('combo_zen');
+    }
+    const gameApp = document.getElementById('game-app');
+    if (gameApp) {
+      gameApp.classList.add('resonance-fever-active');
+      setTimeout(() => {
+        gameApp.classList.remove('resonance-fever-active');
+      }, 3500);
+    }
+    if (window.soundEngine.playComboPraise) window.soundEngine.playComboPraise();
+    triggerHaptic('heavy');
+  }
+
   function triggerVictory() {
     state.gameState = 'VICTORY';
     window.soundEngine.playVictory();
@@ -1152,13 +1513,28 @@
     if (usedShots <= 1) stars = 3;
     else if (usedShots === 2) stars = 2;
 
-    // Check Achievements
+    // Check Achievements & One-Shot Tracking
     if (usedShots <= 1) {
       checkUnlockAchievement('first_shot');
+      state.savedProgress.stats.oneShotsCount = (state.savedProgress.stats.oneShotsCount || 0) + 1;
+      if (state.savedProgress.stats.oneShotsCount >= 5) {
+        checkUnlockAchievement('five_aces');
+      }
+      if (state.savedProgress.stats.oneShotsCount >= 10) {
+        checkUnlockAchievement('ten_aces');
+      }
+      if (state.savedProgress.stats.oneShotsCount >= 20) {
+        checkUnlockAchievement('twenty_aces');
+      }
     }
 
     // Calculate & Award Stage Gems
-    const stageGems = 15 + (stars * 10);
+    // Balanced Economy: 1 star = 1 gem, 2 stars = 2 gems, 3 stars = 3 gems
+    const prevBest = state.savedProgress.completedLevels[state.currentLevel] || 0;
+    let stageGems = Math.max(1, stars);
+    if (prevBest >= stars) {
+      stageGems = 1; // 1 loyalty gem on replay
+    }
     state.stageGemsEarned = stageGems;
     addGems(stageGems, false);
 
@@ -1171,15 +1547,26 @@
       state.savedProgress.highScore = state.score;
     }
 
+    // World Completion Milestone Checkpoints (10, 20, 30, 40, 50)
+    if (state.currentLevel >= 10) checkUnlockAchievement('conqueror_w1');
+    if (state.currentLevel >= 20) checkUnlockAchievement('conqueror_w2');
+    if (state.currentLevel >= 30) checkUnlockAchievement('conqueror_w3');
+    if (state.currentLevel >= 40) checkUnlockAchievement('conqueror_w4');
+    if (state.currentLevel >= 50) checkUnlockAchievement('conqueror_w5');
+
+    // Star Milestones
     const totalStars = Object.values(state.savedProgress.completedLevels).reduce((a, b) => a + b, 0);
-    if (totalStars >= 15) {
-      checkUnlockAchievement('stars_collector');
-    }
-    if (state.currentLevel >= 8) {
-      checkUnlockAchievement('harmony_master');
-    }
+    if (totalStars >= 15) checkUnlockAchievement('stars_collector');
+    if (totalStars >= 40) checkUnlockAchievement('stars_champion');
+    if (totalStars >= 80) checkUnlockAchievement('stars_master');
+    if (totalStars >= 120) checkUnlockAchievement('stars_legend');
+    if (totalStars >= 150) checkUnlockAchievement('stars_ultimate');
+
+    // Check & Claim Star Milestone Chests
+    checkStarChests(totalStars);
 
     saveStorage();
+    updateRankDisplay();
 
     // Populate Victory Modal
     document.getElementById('stat-shots-used').textContent = usedShots;
@@ -1189,18 +1576,19 @@
     const stageGemsEl = document.getElementById('stat-stage-gems');
     if (stageGemsEl) stageGemsEl.textContent = `+${stageGems} 💎`;
 
-    // Configure Double Reward Ad Button
+    // Configure Mega Bonus Rewarded Ad Button (+25 Gems)
     const btnDoubleAd = document.getElementById('btn-double-reward-ad');
     if (btnDoubleAd) {
       const isEn = window.i18n && window.i18n.getLang() === 'en';
+      const adBonusGems = 25;
       btnDoubleAd.disabled = false;
-      btnDoubleAd.innerHTML = `<span class="ad-pill-tag">${isEn ? 'Reward x2' : 'مكافأة x2'}</span><span>🎬 ${isEn ? 'Watch Ad & Double Gems' : 'شاهد إعلاناً وضاعف الجواهر'} (+${stageGems * 2} 💎)</span>`;
+      btnDoubleAd.innerHTML = `<span class="ad-pill-tag">${isEn ? 'Mega Bonus' : 'بونص إضافي'}</span><span>🎬 ${isEn ? 'Watch Ad & Claim Bonus' : 'شاهد إعلاناً واحصل على بونص'} (+${adBonusGems} 💎)</span>`;
       btnDoubleAd.onclick = () => {
         showRewardedAd(() => {
-          addGems(stageGems, true);
+          addGems(adBonusGems, true);
           btnDoubleAd.disabled = true;
-          btnDoubleAd.innerHTML = `<span style="color:#06d6a0;">${isEn ? 'Reward Doubled Successfully! ✓' : 'تمت مضاعفة المكافأة بنجاح! ✓'} (+${stageGems * 2} 💎)</span>`;
-        }, isEn ? 'Preparing double reward...' : 'جاري تجهيز مضاعفة مكافأة النصر...');
+          btnDoubleAd.innerHTML = `<span style="color:#06d6a0;">${isEn ? 'Bonus Claimed Successfully! ✓' : 'تم استلام +25 💎 بنجاح! ✓'}</span>`;
+        }, isEn ? 'Preparing bonus reward...' : 'جاري تجهيز بونص الجواهر...');
       };
     }
 
@@ -1259,6 +1647,8 @@
 
     // Draw Level Entities
     drawWalls();
+    drawGlassWalls();
+    drawBumpers();
     drawLaserGates();
     drawSwitches();
     drawGravityWells();
@@ -1338,6 +1728,99 @@
       ctx.roundRect(x, y, w.width, w.height, r);
       ctx.fill();
       ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function drawGlassWalls() {
+    glassWalls.forEach(w => {
+      ctx.save();
+      if (w.shake > 0) {
+        w.shake = Math.max(0, w.shake - 0.8);
+      }
+      const shakeX = (Math.random() - 0.5) * w.shake;
+      const shakeY = (Math.random() - 0.5) * w.shake;
+      ctx.translate(w.x + shakeX, w.y + shakeY);
+      ctx.rotate(w.angle);
+
+      const r = 3;
+      const x = -w.width / 2;
+      const y = -w.height / 2;
+
+      // Translucent cyan glass body
+      ctx.fillStyle = 'rgba(0, 243, 255, 0.16)';
+      ctx.strokeStyle = w.hp < w.maxHp ? '#ffe66d' : '#00f3ff';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w.width, w.height, r);
+      ctx.fill();
+      ctx.stroke();
+
+      // Glass diagonal reflection highlight
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x + 4, y + 4);
+      ctx.lineTo(x + Math.min(w.width - 4, 30), y + Math.min(w.height - 4, 30));
+      ctx.stroke();
+
+      // Cracks if damaged
+      if (w.hp < w.maxHp) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, y + 2);
+        ctx.lineTo(-4, 0);
+        ctx.lineTo(5, 2);
+        ctx.lineTo(0, y + w.height - 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    });
+  }
+
+  function drawBumpers() {
+    bumpers.forEach(b => {
+      ctx.save();
+      ctx.translate(b.x, b.y);
+
+      // Pulse animation decay
+      if (b.pulse > 0) {
+        b.pulse = Math.max(0, b.pulse - 0.05);
+      }
+      const expand = b.pulse * 7;
+      const r = b.radius + expand;
+
+      // Outer energetic neon ring
+      ctx.strokeStyle = b.pulse > 0 ? '#ffffff' : (b.color || '#ff007f');
+      ctx.lineWidth = b.pulse > 0 ? 5 : 3.5;
+      ctx.fillStyle = b.pulse > 0 ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 0, 127, 0.2)';
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Middle concentric ring
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.65, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Center power core
+      ctx.fillStyle = b.pulse > 0 ? '#ffffff' : (b.color || '#ff007f');
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Symbol
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 11px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚡', 0, 0);
+
       ctx.restore();
     });
   }
@@ -2132,7 +2615,7 @@
     for (let i = floatingTexts.length - 1; i >= 0; i--) {
       const ft = floatingTexts[i];
       ft.y += ft.vy;
-      ft.alpha -= 0.022;
+      ft.alpha -= 0.038;
 
       if (ft.alpha <= 0) {
         floatingTexts.splice(i, 1);
@@ -2243,6 +2726,16 @@
   }
 
   function onPointerDown(e) {
+    if (state.gameState === 'FLYING') {
+      // Tap during flight toggles Fast-Forward (2.2x speed)
+      state.fastForward = !state.fastForward;
+      state.timeScale = state.fastForward ? 2.2 : 1.0;
+      triggerHaptic('medium');
+      const text = state.fastForward ? '⏩ 2.2x FAST' : '▶ 1x SPEED';
+      addFloatingText(text, CANVAS_LOGICAL_WIDTH / 2, CANVAS_LOGICAL_HEIGHT * 0.65, '#00f3ff');
+      return;
+    }
+
     if (state.gameState !== 'AIMING') return;
 
     if (e.cancelable) e.preventDefault();
@@ -2452,10 +2945,10 @@
     if (btnClaimAdGems) {
       btnClaimAdGems.onclick = () => {
         showRewardedAd(() => {
-          addGems(100, true);
-          btnClaimAdGems.innerHTML = '<span class="gift-icon">✨</span><span class="gift-val">+100 💎</span>';
+          addGems(50, true);
+          btnClaimAdGems.innerHTML = '<span class="gift-icon">✨</span><span class="gift-val">+50 💎</span>';
           setTimeout(() => {
-            btnClaimAdGems.innerHTML = '<span class="gift-icon">🎁</span><span class="gift-val">+100 💎</span>';
+            btnClaimAdGems.innerHTML = '<span class="gift-icon">🎁</span><span class="gift-val">+50 💎</span>';
           }, 3500);
         }, 'جاري تحميل مكافأة الأطياف السريعة...');
       };
@@ -2521,12 +3014,23 @@
       };
     }
 
+    const playerRankBadge = document.getElementById('player-rank-badge');
+    if (playerRankBadge) {
+      playerRankBadge.onclick = () => {
+        populateAchievementsModal();
+        modalAchievements.classList.remove('hidden');
+      };
+    }
+    updateRankDisplay();
+
     // Apple StoreKit Restore Purchases
     const btnRestoreIap = document.getElementById('btn-restore-iap');
     if (btnRestoreIap) {
       btnRestoreIap.onclick = () => {
         state.savedProgress.unlockedSkins = ['neon', 'aurora', 'celestial', 'supernova'];
         addGems(500, false);
+        checkUnlockAchievement('skin_collector');
+        checkUnlockAchievement('skin_fashionista');
         saveStorage();
         if (window.soundEngine.playAchievement) window.soundEngine.playAchievement();
         triggerHaptic('medium');
@@ -2589,15 +3093,27 @@
       const isUnlocked = unlocked.includes(ach.id);
       let currentVal = 0;
 
-      if (ach.id === 'first_gem') currentVal = Math.min(ach.target, state.savedProgress.gems || 0);
+      if (ach.id === 'first_gem' || ach.id === 'gem_tycoon') currentVal = Math.min(ach.target, state.savedProgress.gems || 0);
       else if (ach.id === 'ad_supporter') currentVal = Math.min(ach.target, stats.adsWatched || 0);
-      else if (ach.id === 'first_shot') currentVal = isUnlocked ? 1 : 0;
+      else if (ach.id === 'first_shot') currentVal = isUnlocked ? 1 : Math.min(1, stats.oneShotsCount || 0);
+      else if (ach.id === 'five_aces' || ach.id === 'ten_aces' || ach.id === 'twenty_aces') currentVal = Math.min(ach.target, stats.oneShotsCount || 0);
       else if (ach.id === 'combo_master') currentVal = Math.min(ach.target, isUnlocked ? 3 : state.maxCombo);
-      else if (ach.id === 'crystal_hunter') currentVal = Math.min(ach.target, stats.totalCrystalsBroken || 0);
-      else if (ach.id === 'portal_traveler') currentVal = Math.min(ach.target, stats.portalsUsed || 0);
-      else if (ach.id === 'stars_collector') currentVal = Math.min(ach.target, totalStars);
-      else if (ach.id === 'skin_collector') currentVal = Math.min(ach.target, (state.savedProgress.unlockedSkins || []).length);
-      else if (ach.id === 'harmony_master') currentVal = Math.min(ach.target, state.currentLevel);
+      else if (ach.id === 'fever_king') currentVal = Math.min(ach.target, isUnlocked ? 5 : state.maxCombo);
+      else if (ach.id === 'hyper_combo') currentVal = Math.min(ach.target, isUnlocked ? 8 : state.maxCombo);
+      else if (ach.id === 'combo_zen') currentVal = Math.min(ach.target, stats.feverCount || 0);
+      else if (ach.id === 'crystal_hunter' || ach.id === 'crystal_demolisher' || ach.id === 'crystal_obliteration' || ach.id === 'crystal_colossus') currentVal = Math.min(ach.target, stats.totalCrystalsBroken || 0);
+      else if (ach.id === 'bomb_specialist') currentVal = Math.min(ach.target, stats.bombsDetonated || 0);
+      else if (ach.id === 'portal_traveler' || ach.id === 'hyper_jumper') currentVal = Math.min(ach.target, stats.portalsUsed || 0);
+      else if (ach.id === 'gravity_rider' || ach.id === 'gravity_master') currentVal = Math.min(ach.target, stats.gravityUsed || 0);
+      else if (ach.id === 'prism_weaver') currentVal = Math.min(ach.target, stats.prismsUsed || 0);
+      else if (ach.id === 'laser_hacker') currentVal = Math.min(ach.target, stats.lasersDisabled || 0);
+      else if (ach.id.startsWith('stars_')) currentVal = Math.min(ach.target, totalStars);
+      else if (ach.id === 'skin_collector' || ach.id === 'skin_fashionista') currentVal = Math.min(ach.target, (state.savedProgress.unlockedSkins || []).length);
+      else if (ach.id === 'conqueror_w1') currentVal = isUnlocked ? 10 : Math.min(10, Math.max(0, ...Object.keys(state.savedProgress.completedLevels).map(Number)));
+      else if (ach.id === 'conqueror_w2') currentVal = isUnlocked ? 20 : Math.min(20, Math.max(0, ...Object.keys(state.savedProgress.completedLevels).map(Number)));
+      else if (ach.id === 'conqueror_w3') currentVal = isUnlocked ? 30 : Math.min(30, Math.max(0, ...Object.keys(state.savedProgress.completedLevels).map(Number)));
+      else if (ach.id === 'conqueror_w4') currentVal = isUnlocked ? 40 : Math.min(40, Math.max(0, ...Object.keys(state.savedProgress.completedLevels).map(Number)));
+      else if (ach.id === 'conqueror_w5') currentVal = isUnlocked ? 50 : Math.min(50, Math.max(0, ...Object.keys(state.savedProgress.completedLevels).map(Number)));
 
       const progressPercent = Math.min(100, Math.round((currentVal / ach.target) * 100));
       const isEn = window.i18n && window.i18n.getLang() === 'en';
@@ -2754,7 +3270,9 @@
               COLORS.cyan.main = sk.cyan;
               COLORS.magenta.main = sk.magenta;
               saveStorage();
-              checkUnlockAchievement('skin_collector');
+              const skinsCount = (state.savedProgress.unlockedSkins || []).length;
+              if (skinsCount >= 2) checkUnlockAchievement('skin_collector');
+              if (skinsCount >= 4) checkUnlockAchievement('skin_fashionista');
               if (window.soundEngine.playAchievement) window.soundEngine.playAchievement();
               triggerHaptic('heavy');
               populateSkinsModal();
@@ -2780,7 +3298,9 @@
               COLORS.cyan.main = sk.cyan;
               COLORS.magenta.main = sk.magenta;
               saveStorage();
-              checkUnlockAchievement('skin_collector');
+              const skinsCount = (state.savedProgress.unlockedSkins || []).length;
+              if (skinsCount >= 2) checkUnlockAchievement('skin_collector');
+              if (skinsCount >= 4) checkUnlockAchievement('skin_fashionista');
               populateSkinsModal();
               addFloatingText(isEn ? `Unlocked ${skinName}! ✨` : `تم فتح مظهر ${skinName}! ✨`, drag.anchorX, drag.anchorY - 40, '#06d6a0');
             }, isEn ? `Unlocking ${skinName}...` : `جاري فتح مظهر ${skinName}...`);
