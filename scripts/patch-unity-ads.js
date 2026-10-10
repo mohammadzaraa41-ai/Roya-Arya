@@ -177,7 +177,7 @@ class RewardedVideoLoadDelegate: NSObject, UnityAdsLoadDelegate {
         callback(true, nil)
     }
     
-    func unityAdsAdFailedToLoad(_ placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
+    func unityAdsAdFailed(toLoad placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
         print("[UnityAds] Rewarded video failed to load: \\(message)")
         parent?.rewardedVideoLoaded = false
         callback(false, "Failed to load rewarded video: \\(message)")
@@ -199,7 +199,7 @@ class InterstitialLoadDelegate: NSObject, UnityAdsLoadDelegate {
         callback(true, nil)
     }
     
-    func unityAdsAdFailedToLoad(_ placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
+    func unityAdsAdFailed(toLoad placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
         print("[UnityAds] Interstitial failed to load: \\(message)")
         parent?.interstitialLoaded = false
         callback(false, "Failed to load interstitial: \\(message)")
