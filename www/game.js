@@ -256,8 +256,71 @@
     }
   }
 
-  // --- Universal Rewarded Video Ad Service (Browser & iOS Ready) ---
-  function showRewardedAd(onRewardGranted, customTitle = 'جاري تشغيل الإعلان الترويجي...') {
+  // --- Unity Ads Configuration & Service ---
+  const UNITY_ADS_CONFIG = {
+    gameId: '800394120',
+    placementRewarded: 'BP_Rewarded_iOS',
+    placementInterstitial: 'BP_Interstitial_iOS',
+    testMode: false
+  };
+
+  let unityAdsInitialized = false;
+
+  async function initUnityAds() {
+    if (unityAdsInitialized) return;
+    try {
+      const unity = window.Capacitor?.Plugins?.Unityads;
+      if (unity) {
+        await unity.initialize({
+          gameId: UNITY_ADS_CONFIG.gameId,
+          testMode: UNITY_ADS_CONFIG.testMode
+        });
+        unityAdsInitialized = true;
+        // Pre-load rewarded video ad in background for instant playback
+        unity.loadRewardedVideo({ placementId: UNITY_ADS_CONFIG.placementRewarded }).catch(() => {});
+        console.log('Unity Ads successfully initialized with Game ID:', UNITY_ADS_CONFIG.gameId);
+      }
+    } catch (e) {
+      console.warn('Unity Ads initialization notice:', e);
+    }
+  }
+
+  // --- Universal Rewarded Video Ad Service (Native Unity Ads with Seamless Fallback) ---
+  async function showRewardedAd(onRewardGranted, customTitle = 'جاري تشغيل الإعلان الترويجي...') {
+    // 1. Try Native Unity Ads first if running inside mobile app
+    const unity = window.Capacitor?.Plugins?.Unityads;
+    if (unity) {
+      try {
+        if (!unityAdsInitialized) {
+          await initUnityAds();
+        }
+        // Ensure ad is ready
+        let isLoaded = await unity.isRewardedVideoLoaded().catch(() => ({ loaded: false }));
+        if (!isLoaded || !isLoaded.loaded) {
+          await unity.loadRewardedVideo({ placementId: UNITY_ADS_CONFIG.placementRewarded });
+        }
+        const res = await unity.showRewardedVideo();
+        if (res && res.success) {
+          state.savedProgress.stats.adsWatched = (state.savedProgress.stats.adsWatched || 0) + 1;
+          saveStorage();
+          if (state.savedProgress.stats.adsWatched >= 3) {
+            checkUnlockAchievement('ad_supporter');
+          }
+          if (window.soundEngine.playAchievement) window.soundEngine.playAchievement();
+          triggerHaptic('heavy');
+          if (typeof onRewardGranted === 'function') {
+            onRewardGranted();
+          }
+          // Preload next ad immediately
+          unity.loadRewardedVideo({ placementId: UNITY_ADS_CONFIG.placementRewarded }).catch(() => {});
+          return;
+        }
+      } catch (nativeErr) {
+        console.warn('Native Unity Ads playback error, falling back to simulator:', nativeErr);
+      }
+    }
+
+    // 2. Browser Preview / Offline Fallback Simulator (always guarantees player reward)
     adSimOverlay.classList.remove('hidden');
     const titleEl = adSimOverlay.querySelector('h3');
     if (titleEl) titleEl.textContent = customTitle;
@@ -3333,6 +3396,7 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     setupUI();
+    initUnityAds();
     requestAnimationFrame(gameLoop);
   }
 
