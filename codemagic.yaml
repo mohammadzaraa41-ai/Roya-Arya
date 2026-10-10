@@ -20,6 +20,7 @@ workflows:
       - name: Install npm dependencies
         script: |
           npm install
+          node scripts/patch-unity-ads.js || true
 
       - name: Capacitor Sync iOS
         script: |

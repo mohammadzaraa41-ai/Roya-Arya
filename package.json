@@ -6,7 +6,8 @@
   "scripts": {
     "start": "python -m http.server 4173",
     "cap:sync": "cap sync ios",
-    "cap:open": "cap open ios"
+    "cap:open": "cap open ios",
+    "postinstall": "node scripts/patch-unity-ads.js"
   },
   "author": "Roya & Arya Team",
   "license": "MIT",
