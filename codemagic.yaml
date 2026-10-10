@@ -25,6 +25,7 @@ workflows:
       - name: Capacitor Sync iOS
         script: |
           npx cap sync ios
+          node scripts/patch-unity-ads.js || true
 
       - name: Increment build number
         script: |
